@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 //REGISTER
 const postRegister = async (req, res) => {
@@ -22,10 +23,20 @@ const postRegister = async (req, res) => {
 
 module.exports.postRegister = postRegister;
 
+//Generate JWT
+const generateToken = (payload) => {
+  return jwt.sign({ payload }, process.env.JWT_SECRET, { expiresIn: "1 days" });
+};
+
 //LOGIN
 const postLogin = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
+    const { password, ...others } = user._doc;
+    const payload = {
+      user: others,
+    };
+    const accessToken = generateToken(payload);
     if (!user) {
       return res.status(404).json({ message: "Kullanıcı bilgileri hatalı !" });
     }
@@ -37,8 +48,8 @@ const postLogin = async (req, res) => {
     if (!validPassword) {
       return res.status(404).json({ message: "Kullanıcı bilgileri hatalı !" });
     }
-    const { password, ...other } = user._doc;
-    res.status(200).json(other);
+
+    res.status(200).json({ user: payload.user, accessToken });
   } catch (err) {
     res.status(500).json(err);
   }
