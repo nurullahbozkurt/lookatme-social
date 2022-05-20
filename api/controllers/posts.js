@@ -59,11 +59,22 @@ module.exports.getPost = getPost;
 
 //Get User All Posts
 const userAllPosts = async (req, res) => {
-  try {
-    const userPosts = await Post.find({ userId: req.params.id });
-    res.status(200).json(userPosts);
-  } catch (err) {
-    res.status(500).json(err);
+  const user = await User.findById(req.params.id);
+  const userPosts = await Post.findOne({ userId: req.params.id });
+
+  if (user) {
+    if (userPosts) {
+      try {
+        const userPosts = await Post.find({ userId: req.params.id });
+        res.status(200).json(userPosts);
+      } catch (err) {
+        res.status(500).json(err);
+      }
+    } else {
+      res.status(401).json("Kullanıcıya ait post yok !");
+    }
+  } else {
+    res.status(404).json("Kullanıcı Bulunamadı !");
   }
 };
 module.exports.userAllPosts = userAllPosts;

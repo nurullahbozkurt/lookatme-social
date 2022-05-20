@@ -9,8 +9,8 @@ const verifyToken = async (req, res, next) => {
       if (err) {
         return res.status(401).json("Token is not valid");
       }
-
       req.user = data.payload.user;
+
       next();
     });
   } else {

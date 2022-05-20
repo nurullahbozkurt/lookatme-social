@@ -3,7 +3,7 @@ const Users = require("../controllers/users");
 const validateLogin = require("../middlewares/verifyToken");
 
 //Get All Users
-router.get("/all-users", validateLogin.verifyToken, Users.getAllUsers);
+router.get("/all-users", Users.getAllUsers);
 
 //Update User
 router.put("/:id", validateLogin.verifyToken, Users.getUpdateUser);
