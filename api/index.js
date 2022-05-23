@@ -1,4 +1,11 @@
 const express = require("express");
+
+// it fixes express's error handler to work with async/await
+// we should remove this package and this line when Express v5 is released.
+// https://www.npmjs.com/package/express-async-errors
+// https://dev.to/pr0gramista/fix-your-express-error-handling-now-4h2l
+require("express-async-errors");
+
 const app = express();
 
 const mongoose = require("mongoose");

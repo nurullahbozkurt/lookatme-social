@@ -1,25 +1,29 @@
 const router = require("express").Router();
 const Posts = require("../controllers/posts");
+const validateLogin = require("../middlewares/verifyToken");
 
 //Create Post
-router.post("/", Posts.createPost);
+router.post("/", validateLogin.verifyToken, Posts.createPost);
+
+//Get All Posts
+router.get("/allposts", Posts.getAllPosts);
 
 //Update Post
-router.put("/:id", Posts.updatePost);
+router.put("/:id", validateLogin.verifyToken, Posts.updatePost);
 
 //Delete Post
-router.delete("/:id", Posts.deletePost);
+router.delete("/:id", validateLogin.verifyToken, Posts.deletePost);
 
 //Like Post
-router.put("/:id/like", Posts.likePost);
+router.put("/:id/like", validateLogin.verifyToken, Posts.likePost);
 
 //Get Post
 router.get("/:id", Posts.getPost);
 
-//Timeline Post
-router.get("/timeline/all", Posts.timeline);
-
 //Get User All Posts
-router.get("/user-posts/:id", Posts.userAllPosts);
+router.get("/user-posts/:id", validateLogin.verifyToken, Posts.userAllPosts);
+
+//My Time Line Post
+router.get("/:id/my-timeLine", validateLogin.verifyToken, Posts.myTimeline);
 
 module.exports = router;
