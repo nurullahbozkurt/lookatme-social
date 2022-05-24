@@ -57,7 +57,14 @@ const UserSchema = new mongoose.Schema(
       enum: [1, 2, 3],
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.profilePicture = process.env.APP_URL + "/" + ret.profilePicture;
+      },
+    },
+  }
 );
 
 const User = mongoose.model("User", UserSchema);

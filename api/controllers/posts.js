@@ -1,5 +1,18 @@
 const Post = require("../models/Post");
 const User = require("../models/User");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: "public/uploads",
+  filename(req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+}).single("file");
 
 //Create Post
 const createPost = async (req, res) => {
@@ -19,6 +32,39 @@ const createPost = async (req, res) => {
 };
 
 module.exports.createPost = createPost;
+
+//Add Post Image
+const addPostImg = async (req, res) => {
+  console.log("istek geldi");
+  upload(req, res, async (err) => {
+    if (req.file) {
+      if (err) {
+        return res.status(400).json({
+          error: err.message,
+        });
+      }
+
+      console.log(req.user);
+
+      await Post.updateOne(
+        { _id: req.params.id },
+        {
+          img: req.file.path.replace("public/", ""),
+        }
+      );
+
+      return res.json({
+        message: "File uploaded",
+        file: req.file,
+      });
+    } else {
+      return res.status(400).json({
+        error: "No file uploaded",
+      });
+    }
+  });
+};
+module.exports.addPostImg = addPostImg;
 
 //Update Post
 const updatePost = async (req, res) => {
@@ -139,9 +185,11 @@ module.exports.myTimeline = myTimeline;
 
 //Get All Posts
 const getAllPosts = async (req, res) => {
+  const postsCount = await Post.find().countDocuments();
+
   try {
     const posts = await Post.find();
-    res.status(200).json(posts);
+    res.status(200).json({ posts, postsCount });
   } catch (err) {
     res.status(500).json(err);
   }

@@ -8,6 +8,9 @@ router.post("/", validateLogin.verifyToken, Posts.createPost);
 //Get All Posts
 router.get("/allposts", Posts.getAllPosts);
 
+// Add Post Img
+router.post("/:id/add-post-img", validateLogin.verifyToken, Posts.addPostImg);
+
 //Update Post
 router.put("/:id", validateLogin.verifyToken, Posts.updatePost);
 
@@ -21,7 +24,7 @@ router.put("/:id/like", validateLogin.verifyToken, Posts.likePost);
 router.get("/:id", Posts.getPost);
 
 //Get User All Posts
-router.get("/user-posts/:id", validateLogin.verifyToken, Posts.userAllPosts);
+router.get("/:id/user-posts", validateLogin.verifyToken, Posts.userAllPosts);
 
 //My Time Line Post
 router.get("/:id/my-timeLine", validateLogin.verifyToken, Posts.myTimeline);

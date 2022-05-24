@@ -1,5 +1,18 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: "public/uploads",
+  filename(req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+}).single("file");
 
 //Get All Users
 const getAllUsers = async (req, res) => {
@@ -37,6 +50,50 @@ const getUpdateUser = async (req, res) => {
   }
 };
 module.exports.getUpdateUser = getUpdateUser;
+
+// Post Profile Picture
+const postProfilePicture = (req, res) => {
+  console.log("istek geldi");
+  upload(req, res, async (err) => {
+    if (req.file) {
+      if (err) {
+        return res.status(400).json({
+          error: err.message,
+        });
+      }
+
+      console.log(req.user);
+
+      await User.updateOne(
+        { _id: req.user._id },
+        {
+          profilePicture: req.file.path.replace("public/", ""),
+        }
+      );
+
+      return res.json({
+        message: "File uploaded",
+        file: req.file,
+      });
+    } else {
+      return res.status(400).json({
+        error: "No file uploaded",
+      });
+    }
+  });
+};
+module.exports.postProfilePicture = postProfilePicture;
+
+// Get Profile Picture
+const getProfilePicture = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+module.exports.getProfilePicture = getProfilePicture;
 
 // Delete User
 const getDeleteUser = async (req, res) => {

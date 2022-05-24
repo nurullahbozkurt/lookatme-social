@@ -18,7 +18,14 @@ const PostSchema = new mongoose.Schema(
       default: [],
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.img = process.env.APP_URL + "/" + ret.img;
+      },
+    },
+  }
 );
 
 const Post = mongoose.model("Post", PostSchema);

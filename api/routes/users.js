@@ -8,6 +8,20 @@ router.get("/all-users", Users.getAllUsers);
 //Update User
 router.put("/:id", validateLogin.verifyToken, Users.getUpdateUser);
 
+// Post Profile Picture
+router.post(
+  "/:id/profile-picture",
+  validateLogin.verifyToken,
+  Users.postProfilePicture
+);
+
+// Get Profile Picture
+router.get(
+  "/:id/profile-picture",
+  validateLogin.verifyToken,
+  Users.getProfilePicture
+);
+
 //Delete User
 router.delete("/:id", validateLogin.verifyToken, Users.getDeleteUser);
 
