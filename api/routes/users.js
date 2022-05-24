@@ -15,11 +15,11 @@ router.post(
   Users.postProfilePicture
 );
 
-// Get Profile Picture
-router.get(
-  "/:id/profile-picture",
+// Post Cover Picture
+router.post(
+  "/:id/cover-picture",
   validateLogin.verifyToken,
-  Users.getProfilePicture
+  Users.postCoverPicture
 );
 
 //Delete User

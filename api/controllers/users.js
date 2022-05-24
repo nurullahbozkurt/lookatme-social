@@ -84,16 +84,56 @@ const postProfilePicture = (req, res) => {
 };
 module.exports.postProfilePicture = postProfilePicture;
 
-// Get Profile Picture
-const getProfilePicture = async (req, res) => {
+// Post Cover Picture
+const postCoverPicture = async (req, res) => {
+  console.log("istek geldi");
+  upload(req, res, async (err) => {
+    if (req.file) {
+      if (err) {
+        return res.status(400).json({
+          error: err.message,
+        });
+      }
+
+      console.log(req.user);
+
+      await User.updateOne(
+        { _id: req.user._id },
+        {
+          coverPicture: req.file.path.replace("public/", ""),
+        }
+      );
+
+      return res.json({
+        message: "File uploaded",
+        file: req.file,
+      });
+    } else {
+      return res.status(400).json({
+        error: "No file uploaded",
+      });
+    }
+  });
+};
+module.exports.postCoverPicture = postCoverPicture;
+
+// Get User
+const getUser = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    return res.status(404).json("User not found !");
+  }
+  if (req.params.id !== req.user._id) {
+    return res.status(401).json("You can't see another user !");
+  }
+
   try {
-    const user = await User.findById(req.user._id);
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
   }
 };
-module.exports.getProfilePicture = getProfilePicture;
+module.exports.getUser = getUser;
 
 // Delete User
 const getDeleteUser = async (req, res) => {
@@ -114,25 +154,6 @@ const getDeleteUser = async (req, res) => {
 };
 
 module.exports.getDeleteUser = getDeleteUser;
-
-// Get User
-const getUser = async (req, res) => {
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    return res.status(404).json("User not found !");
-  }
-  if (req.params.id !== req.user._id) {
-    return res.status(401).json("You can't see another user !");
-  }
-
-  try {
-    const { password, ...other } = user._doc;
-    res.status(200).json(other);
-  } catch (err) {
-    res.status(500).json(err);
-  }
-};
-module.exports.getUser = getUser;
 
 // Follow User
 const followUser = async (req, res) => {

@@ -31,19 +31,20 @@ const generateToken = (payload) => {
 //LOGIN
 const postLogin = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email }).select(
+      "+password"
+    );
+    const sendUser = await User.findById(user._id);
     const { password, ...others } = user._doc;
     const payload = {
       user: others,
     };
     const accessToken = generateToken(payload);
     if (!user) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "There was a problem logging in. Check your email and password or create an account !",
-        });
+      return res.status(404).json({
+        message:
+          "There was a problem logging in. Check your email and password or create an account !",
+      });
     }
 
     const validPassword = await bcrypt.compare(
@@ -51,15 +52,13 @@ const postLogin = async (req, res) => {
       user.password
     );
     if (!validPassword) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "There was a problem logging in. Check your email and password or create an account !",
-        });
+      return res.status(404).json({
+        message:
+          "There was a problem logging in. Check your email and password or create an account !",
+      });
     }
 
-    res.status(200).json({ user: payload.user, accessToken });
+    res.status(200).json({ user: sendUser, accessToken });
   } catch (err) {
     res.status(500).json(err);
   }

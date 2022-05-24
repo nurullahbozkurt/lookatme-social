@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: true,
       min: 6,
+      select: false,
     },
     profilePicture: {
       type: String,
@@ -62,6 +63,7 @@ const UserSchema = new mongoose.Schema(
     toJSON: {
       transform: (doc, ret) => {
         ret.profilePicture = process.env.APP_URL + "/" + ret.profilePicture;
+        ret.coverPicture = process.env.APP_URL + "/" + ret.coverPicture;
       },
     },
   }
