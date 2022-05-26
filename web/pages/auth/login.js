@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
 
 const Login = () => {
@@ -14,13 +14,11 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:8800/api/auth/login",
-        form
-      );
+      const res = await Axios.post("/auth/login", form);
       login(res.data.user, res.data.accessToken);
       setError(null);
       setValidateError(null);
+      console.log(res);
     } catch (err) {
       console.log(err.response);
       if (err.response.status === 401 || err.response.status === 404) {

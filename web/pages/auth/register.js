@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
-import axios from "axios";
+import Axios from "../../lib/axios";
 const Register = () => {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -21,11 +21,7 @@ const Register = () => {
       return setPassportAlert(true);
     }
     try {
-      const res = await axios.post(
-        "http://localhost:8800/api/auth/register",
-        form,
-        {}
-      );
+      const res = await Axios.post("/auth/register", form, {});
 
       res.data && router.push("/auth/login");
     } catch (err) {
