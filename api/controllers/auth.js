@@ -8,13 +8,27 @@ const postRegister = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-    const newUser = new User({
+    const userEmailExists = await User.findOne({ email: req.body.email });
+    const userNameExists = await User.findOne({ username: req.body.username });
+
+    if (userEmailExists || userNameExists) {
+      return res.status(409).json({
+        errors: {
+          message: "Email or username already exists !",
+        },
+      });
+    }
+
+    let user = await User.create({
       username: req.body.username,
       email: req.body.email,
       password: hashedPassword,
     });
 
-    const user = await newUser.save();
+    user = user.toJSON();
+
+    delete user.password;
+
     res.status(200).json(user);
   } catch (err) {
     res.status(500).json(err);
@@ -30,31 +44,35 @@ const generateToken = (payload) => {
 
 //LOGIN
 const postLogin = async (req, res) => {
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(401).json({
+      message: "Please fill all fields !",
+    });
+  }
   try {
     const user = await User.findOne({ email: req.body.email }).select(
       "+password"
     );
+    if (!user) {
+      return res.status(401).json({
+        message: "Check your email and password or create an account !",
+      });
+    }
+
     const sendUser = await User.findById(user._id);
     const { password, ...others } = user._doc;
     const payload = {
       user: others,
     };
     const accessToken = generateToken(payload);
-    if (!user) {
-      return res.status(404).json({
-        message:
-          "There was a problem logging in. Check your email and password or create an account !",
-      });
-    }
 
     const validPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
     if (!validPassword) {
-      return res.status(404).json({
-        message:
-          "There was a problem logging in. Check your email and password or create an account !",
+      return res.status(401).json({
+        message: "Check your email and password or create an account !",
       });
     }
 
