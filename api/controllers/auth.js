@@ -21,6 +21,8 @@ const postRegister = async (req, res) => {
 
     let user = await User.create({
       username: req.body.username,
+      name: req.body.name,
+      lastName: req.body.lastName,
       email: req.body.email,
       password: hashedPassword,
     });
