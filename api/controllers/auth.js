@@ -23,6 +23,8 @@ const postRegister = async (req, res) => {
       username: req.body.username,
       name: req.body.name,
       lastName: req.body.lastName,
+      country: req.body.country,
+      city: req.body.city,
       email: req.body.email,
       password: hashedPassword,
     });

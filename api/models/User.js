@@ -21,6 +21,18 @@ const UserSchema = new mongoose.Schema(
       min: 3,
       max: 20,
     },
+    country: {
+      type: String,
+      required: false,
+      min: 3,
+      max: 20,
+    },
+    city: {
+      type: String,
+      required: false,
+      min: 3,
+      max: 20,
+    },
     email: {
       type: String,
       required: true,
