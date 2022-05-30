@@ -20,16 +20,12 @@ const Sidebar = () => {
 
     if (sidebarScrollPosition > 20 && windowScrollPosition < 225) {
       document.getElementById("sidebar").scrollTo(0, windowScrollPosition);
-
-      console.log(document.getElementById("sidebar"));
     }
   };
 
   const onScroll = (e) => {
     setSidebarScrollPosition(e.target.scrollTop);
-    console.log("body", document.body.pageYOffset);
   };
-  console.log("scrolls", sidebarScrollPosition, windowScrollPosition);
   return (
     <>
       <div className="sticky w-full h-[860px] top-[90px] flex flex-col gap-5">

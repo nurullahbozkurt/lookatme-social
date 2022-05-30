@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Sidebar from "../components/sidebar/Sidebar";
 import TimeLine from "../components/time-line/TimeLine";
 
+import withProtectedRoute from "./withProtectedRoute";
 const Home = () => {
   return (
     <Layout>
@@ -18,4 +18,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default withProtectedRoute(Home);

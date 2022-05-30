@@ -1,14 +1,25 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useRef, useState } from "react";
-import { BsChevronDown } from "react-icons/bs";
+import { Fragment } from "react";
 import { BiUser } from "react-icons/bi";
+import { useAuth } from "../states/auth";
+import { useRouter } from "next/router";
+
 export default function Dropdown() {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+  const username = user.name.slice(0, 1) + "." + user.lastName;
+
+  const logOut = () => {
+    logout();
+    router.push("/");
+  };
+
   return (
     <div className="">
       <Menu as="div" className="relative inline-block text-left">
         <div>
           <Menu.Button className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primaryBlue  px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
-            N.Bozkurt
+            {username}
             <div className="text-lg">
               <BiUser />
             </div>
@@ -28,22 +39,12 @@ export default function Dropdown() {
               <Menu.Item>
                 {({ active }) => (
                   <button
+                    onClick={logOut}
                     className={`${
                       active ? "bg-primaryBlue text-white" : "text-gray-900"
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                   >
-                    Edit
-                  </button>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <button
-                    className={`${
-                      active ? "bg-primaryBlue text-white" : "text-gray-900"
-                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
-                  >
-                    Duplicate
+                    Log Out
                   </button>
                 )}
               </Menu.Item>

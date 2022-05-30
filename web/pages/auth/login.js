@@ -1,8 +1,11 @@
 import { useState } from "react";
 import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
+import { useRouter } from "next/router";
+import { useMutation } from "react-query";
 
 const Login = () => {
+  const router = useRouter();
   const { login } = useAuth();
   const [validateError, setValidateError] = useState(null);
   const [error, setError] = useState(null);
@@ -11,14 +14,19 @@ const Login = () => {
     password: "",
   });
 
+  const loginRequest = useMutation(() => {
+    return Axios.post("/auth/login", form);
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await Axios.post("/auth/login", form);
+      const res = await loginRequest.mutateAsync();
+      console.log("res", res);
       login(res.data.user, res.data.accessToken);
       setError(null);
       setValidateError(null);
-      console.log(res);
+      router.push("/");
     } catch (err) {
       console.log(err.response);
       if (err.response.status === 401 || err.response.status === 404) {
@@ -27,6 +35,7 @@ const Login = () => {
       setError(true);
     }
   };
+
   return (
     <div>
       <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">

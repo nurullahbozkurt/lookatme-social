@@ -1,17 +1,46 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Axios from "../../lib/axios";
+import { useMutation } from "react-query";
+import { Country, State, City } from "country-state-city";
+import { BiSort } from "react-icons/bi";
 const Register = () => {
   const router = useRouter();
+  const countries = Country.getAllCountries();
+  const cities = State.getAllStates();
+  //console.log(cities);
+
   const [form, setForm] = useState({
     username: "",
+    name: "",
+    lastName: "",
+    country: "",
+    city: "",
     email: "",
     password: "",
   });
+
+  const selectCountry = useMemo(() => {
+    return countries.find((item) => item.name === form.country);
+  }, [form.country]);
+
+  const selectCity = useMemo(() => {
+    return cities
+      .filter((item) => item.countryCode === selectCountry?.isoCode)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [selectCountry]);
+
+  console.log("form", form);
+
+  //console.log(form);
   const [passportAlert, setPassportAlert] = useState(false);
   const [againPassword, setAgainPassword] = useState("");
   const [error, setError] = useState();
+
+  const registerRequest = useMutation(() => {
+    return Axios.post("/auth/register", form, {});
+  });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,7 +50,7 @@ const Register = () => {
       return setPassportAlert(true);
     }
     try {
-      const res = await Axios.post("/auth/register", form, {});
+      const res = await registerRequest.mutateAsync();
 
       res.data && router.push("/auth/login");
     } catch (err) {
@@ -66,6 +95,44 @@ const Register = () => {
                     <div className="relative">
                       <input
                         onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                        autoComplete="off"
+                        id="name"
+                        name="name"
+                        type="text"
+                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                        placeholder="Name"
+                      />
+                      <label
+                        htmlFor="name"
+                        className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                      >
+                        Name
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <input
+                        onChange={(e) =>
+                          setForm({ ...form, lastName: e.target.value })
+                        }
+                        autoComplete="off"
+                        id="lastName"
+                        name="lastName"
+                        type="text"
+                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                        placeholder="Last Name"
+                      />
+                      <label
+                        htmlFor="lastName"
+                        className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                      >
+                        Last Name
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <input
+                        onChange={(e) =>
                           setForm({ ...form, email: e.target.value })
                         }
                         autoComplete="off"
@@ -82,6 +149,53 @@ const Register = () => {
                         Email Address
                       </label>
                     </div>
+
+                    <div>
+                      <label htmlFor="countrySelect" className="sr-only">
+                        Country Select
+                      </label>
+                      <select
+                        onChange={(e) =>
+                          setForm({ ...form, country: e.target.value })
+                        }
+                        id="countrySelect"
+                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                      >
+                        <option defaultValue={"Choose a country"}>
+                          Choose a country
+                        </option>
+                        {countries.map((country) => (
+                          <>
+                            <option value={country.name}>
+                              {country.name} {country.flag}
+                            </option>
+                          </>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label htmlFor="citySelect" className="sr-only">
+                        City Select
+                      </label>
+                      <select
+                        onChange={(e) =>
+                          setForm({ ...form, city: e.target.value })
+                        }
+                        id="citySelect"
+                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                      >
+                        <option defaultValue={"Choose a country"}>
+                          Choose a country
+                        </option>
+                        {selectCity?.map((city) => (
+                          <>
+                            <option value={city.name}>{city.name}</option>
+                          </>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="relative">
                       <input
                         onChange={(e) =>
