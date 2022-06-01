@@ -7,7 +7,11 @@ import { useRouter } from "next/router";
 export default function Dropdown() {
   const router = useRouter();
   const { user, logout } = useAuth();
-  const username = user.name.slice(0, 1) + "." + user.lastName;
+  const username =
+    user.name.charAt(0).toUpperCase() +
+    "." +
+    user.lastName.charAt(0).toUpperCase() +
+    user.lastName.slice(1).toLowerCase();
 
   const logOut = () => {
     logout();

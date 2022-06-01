@@ -1,6 +1,7 @@
 import React from "react";
 
 const FollowingCard = () => {
+  console.log("FollowingCard");
   return (
     <>
       <div className="w-full border bg-white p-7 flex flex-col items-center justify-center gap-5 shadow-md rounded">

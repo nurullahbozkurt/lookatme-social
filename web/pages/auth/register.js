@@ -150,6 +150,26 @@ const Register = () => {
                       </label>
                     </div>
 
+                    <div className="relative">
+                      <input
+                        onChange={(e) =>
+                          setForm({ ...form, job: e.target.value })
+                        }
+                        autoComplete="off"
+                        id="job"
+                        name="job"
+                        type="text"
+                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
+                        placeholder="What is your job?"
+                      />
+                      <label
+                        htmlFor="job"
+                        className="absolute left-0 -top-3.5 text-gray-600 text-sm peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-440 peer-placeholder-shown:top-2 transition-all peer-focus:-top-3.5 peer-focus:text-gray-600 peer-focus:text-sm"
+                      >
+                        What is your job?
+                      </label>
+                    </div>
+
                     <div>
                       <label htmlFor="countrySelect" className="sr-only">
                         Country Select
