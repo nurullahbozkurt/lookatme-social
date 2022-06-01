@@ -33,6 +33,12 @@ const UserSchema = new mongoose.Schema(
       min: 3,
       max: 20,
     },
+    job: {
+      type: String,
+      required: false,
+      min: 3,
+      max: 20,
+    },
     email: {
       type: String,
       required: true,
@@ -88,6 +94,7 @@ const UserSchema = new mongoose.Schema(
       transform: (doc, ret) => {
         ret.profilePicture = process.env.APP_URL + "/" + ret.profilePicture;
         ret.coverPicture = process.env.APP_URL + "/" + ret.coverPicture;
+        console.log("ret", ret);
       },
     },
   }

@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const path = require("path");
 
 // it fixes express's error handler to work with async/await
 // we should remove this package and this line when Express v5 is released.
@@ -24,11 +25,13 @@ const postRouter = require("./routes/posts");
 //middleware
 app.use(express.json());
 app.use(morgan("common"));
-app.use(helmet());
+app.use(helmet({ crossOriginEmbedderPolicy: false }));
 
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
+app.use(express.static(path.join(__dirname, "public")));
+//app.use("/public", express.static(path.join(__dirname, "/public")));
 
 mongoose
   .connect(process.env.MONGO_URL, {
