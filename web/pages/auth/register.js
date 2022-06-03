@@ -9,7 +9,6 @@ const Register = () => {
   const router = useRouter();
   const countries = Country.getAllCountries();
   const cities = State.getAllStates();
-  //console.log(cities);
 
   const [form, setForm] = useState({
     username: "",
@@ -31,9 +30,6 @@ const Register = () => {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [selectCountry]);
 
-  console.log("form", form);
-
-  //console.log(form);
   const [passportAlert, setPassportAlert] = useState(false);
   const [againPassword, setAgainPassword] = useState("");
   const [error, setError] = useState();

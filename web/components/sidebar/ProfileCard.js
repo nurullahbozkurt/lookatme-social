@@ -1,33 +1,31 @@
+import Image from "next/image";
 import React, { useState } from "react";
 import { useMutation } from "react-query";
 import { GoLocation } from "react-icons/go";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { IoHeartDislikeSharp } from "react-icons/io5";
-import Image from "next/image";
 
 import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
-import useMyPosts from "../../hooks/api/useMyPosts";
 
 const ProfileCard = () => {
   const { user } = useAuth();
-  const { myPosts } = useMyPosts();
-
-  console.log("user", user.profilePicture);
 
   const [avatar, setAvatar] = useState();
   const [file, setFile] = useState();
 
   const hiddenFileInput = React.useRef();
 
-  console.log("avatar", file);
-
   const picUrl = user.profilePicture + "api";
   const name = user.name[0].toUpperCase() + user.name.slice(1);
   const lastname = user.lastName[0].toUpperCase() + user.lastName.slice(1);
-  const job = user.job[0].toUpperCase() + user.job.slice(1);
-  const country = user.country[0].toUpperCase() + user.country.slice(1);
-  const city = user.city[0].toUpperCase() + user.city.slice(1);
+  const job = user?.job ? user.job[0].toUpperCase() + user?.job.slice(1) : "";
+  const country = user?.country
+    ? user.country[0].toUpperCase() + user.country.slice(1)
+    : "";
+  const city = user?.city
+    ? user.city[0].toUpperCase() + user.city.slice(1)
+    : "";
 
   const handleClick = () => {
     hiddenFileInput.current.click();
@@ -52,8 +50,7 @@ const ProfileCard = () => {
 
   const uploadAvatar = async () => {
     try {
-      const res = await uploadRequest.mutateAsync();
-      console.log("res", res);
+      await uploadRequest.mutateAsync();
     } catch (err) {
       console.log(err);
     }
@@ -66,23 +63,24 @@ const ProfileCard = () => {
           <div className="relative shadow-avatarShadow flex items-center justify-center border rounded-full p-1">
             {picUrl !== process.env.NEXT_PUBLIC_API_URL && (
               <>
-                {/* <div className="relative w-32 h-32 rounded-full ">
+                <div className="relative w-32 h-32 rounded-full overflow-hidden">
                   <Image
-                    className="w-32 h-32 rounded-full "
+                    className="w-full h-full"
                     alt=""
-                    src="http://localhost:8800/uploads/1654087729149-computer.jpg"
+                    src={user?.profilePicture}
                     objectFit="cover"
-                    layout="responsive"
+                    layout="fill"
                     width={600}
                     height={350}
                   ></Image>
-                </div> */}
+                </div>
 
-                <img
+                {/* <img
                   className="w-32 h-32 rounded-full "
                   src="http://localhost:8800/uploads/1654087729149-computer.jpg"
                   alt="Rounded avatar"
-                />
+                  crossOrigin="anonymous"
+                /> */}
                 <div className="absolute top-0 -right-2">
                   <div className="text-red-700/60 text-2xl">
                     <IoHeartDislikeSharp />
@@ -136,15 +134,17 @@ const ProfileCard = () => {
                 {job}
               </h1>
             </div>
-            <div className="flex items-center justify-center gap-2">
-              <GoLocation />
-              <h1 className="text-gray-500">
-                {country}, {city}
-              </h1>
-            </div>
+            {user.country && (
+              <div className="flex items-center justify-center gap-2">
+                <GoLocation />
+                <h1 className="text-gray-500">
+                  {country}, {city}
+                </h1>
+              </div>
+            )}
             <div className="flex items-center gap-7">
               <div className="flex flex-col items-center">
-                <p className="font-bold">{myPosts?.length}</p>
+                <p className="font-bold">{user.posts}</p>
                 <p className="font-bold opacity-50">Post</p>
               </div>
               <div className="flex flex-col items-center">

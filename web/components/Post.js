@@ -2,8 +2,11 @@ import { AiFillLike } from "react-icons/ai";
 import { FaHeart } from "react-icons/fa";
 import { BiSend } from "react-icons/bi";
 import { GoLocation } from "react-icons/go";
+import useTimeLine from "../hooks/api/useTimeLine";
 
 const TimeLinePost = () => {
+  const { timeLine } = useTimeLine();
+  console.log("timeline", timeLine);
   return (
     <div className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
       <header className="flex items-center gap-3 pb-3 border-b">
