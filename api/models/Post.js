@@ -12,6 +12,15 @@ const PostSchema = new mongoose.Schema(
     },
     img: {
       type: String,
+      default: "",
+    },
+    country: {
+      type: String,
+      default: "",
+    },
+    city: {
+      type: String,
+      default: "",
     },
     likes: {
       type: Array,
@@ -21,12 +30,23 @@ const PostSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
       transform: (doc, ret) => {
-        ret.img = process.env.APP_URL + "/" + ret.img;
+        ret.img = process.env.APP_URL + "/uploads/" + ret.img;
       },
+    },
+    toObject: {
+      virtuals: true,
     },
   }
 );
+
+PostSchema.virtual("user", {
+  ref: "User",
+  localField: "userId",
+  foreignField: "_id",
+  justOne: true,
+});
 
 const Post = mongoose.model("Post", PostSchema);
 module.exports = Post;

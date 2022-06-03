@@ -17,7 +17,6 @@ const upload = multer({
 //Create Post
 const createPost = async (req, res) => {
   const user = await User.findById(req.user._id);
-
   if (!user) {
     return res.status(404).json("User not found !");
   }
@@ -35,7 +34,6 @@ module.exports.createPost = createPost;
 
 //Add Post Image
 const addPostImg = async (req, res) => {
-  console.log("istek geldi");
   upload(req, res, async (err) => {
     if (req.file) {
       if (err) {
@@ -43,8 +41,6 @@ const addPostImg = async (req, res) => {
           error: err.message,
         });
       }
-
-      console.log(req.user);
 
       await Post.updateOne(
         { _id: req.params.id },
@@ -111,7 +107,9 @@ module.exports.deletePost = deletePost;
 //Get Post
 const getPost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const post = await Post.findById(req.params.id).populate([
+      { path: "user", select: "-followers" },
+    ]);
     res.status(200).json(post);
   } catch (err) {
     res.status(500).json(err);
@@ -122,8 +120,9 @@ module.exports.getPost = getPost;
 //Get User All Posts
 const userAllPosts = async (req, res) => {
   const user = await User.findById(req.user._id);
-  const userPosts = await Post.find({ userId: req.params.id });
-
+  const userPosts = await Post.find({ userId: req.params.id }).populate([
+    { path: "user", select: "-followers" },
+  ]);
   if (!user) {
     return res.status(404).json("User not found !");
   }
@@ -159,18 +158,26 @@ module.exports.likePost = likePost;
 
 //Get My Timeline Posts
 const myTimeline = async (req, res) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.params.id);
   if (!user) {
     return res.status(404).json("User not found !");
   }
+  if (user.id !== req.user._id) {
+    return res.status(401).json("You are not authorized !");
+  }
+
   try {
     const me = await User.findById(req.user._id);
-    const mePost = await Post.find({ userId: me.id });
+    const mePost = await Post.find({ userId: me.id }).populate([
+      { path: "user", select: "-followers" },
+    ]);
     const myfriends = me.following;
 
     const friendsPosts = await Promise.all(
       myfriends.map((friend) => {
-        return Post.find({ userId: friend });
+        return Post.find({ userId: friend }).populate([
+          { path: "user", select: "-followers" },
+        ]);
       })
     );
     if (mePost) {

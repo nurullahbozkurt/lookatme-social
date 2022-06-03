@@ -57,13 +57,14 @@ const postLogin = async (req, res) => {
     const user = await User.findOne({ email: req.body.email }).select(
       "+password"
     );
+
     if (!user) {
       return res.status(401).json({
         message: "Check your email and password or create an account !",
       });
     }
 
-    const sendUser = await User.findById(user._id);
+    const sendUser = await User.findById(user._id).populate("posts");
     const { password, ...others } = user._doc;
     const payload = {
       user: others,

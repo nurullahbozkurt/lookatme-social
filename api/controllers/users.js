@@ -53,7 +53,6 @@ module.exports.getUpdateUser = getUpdateUser;
 
 // Post Profile Picture
 const postProfilePicture = (req, res) => {
-  console.log("istek geldi");
   upload(req, res, async (err) => {
     if (req.file) {
       if (err) {
@@ -61,8 +60,6 @@ const postProfilePicture = (req, res) => {
           error: err.message,
         });
       }
-
-      console.log(req.user);
 
       await User.updateOne(
         { _id: req.user._id },
@@ -86,7 +83,6 @@ module.exports.postProfilePicture = postProfilePicture;
 
 // Post Cover Picture
 const postCoverPicture = async (req, res) => {
-  console.log("istek geldi");
   upload(req, res, async (err) => {
     if (req.file) {
       if (err) {

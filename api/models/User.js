@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
       min: 3,
       max: 20,
     },
+
     name: {
       type: String,
       required: true,
@@ -91,14 +92,23 @@ const UserSchema = new mongoose.Schema(
   {
     timestamps: true,
     toJSON: {
+      virtuals: true,
       transform: (doc, ret) => {
         ret.profilePicture = process.env.APP_URL + "/" + ret.profilePicture;
         ret.coverPicture = process.env.APP_URL + "/" + ret.coverPicture;
-        console.log("ret", ret);
       },
+    },
+    toObject: {
+      virtuals: true,
     },
   }
 );
 
+UserSchema.virtual("posts", {
+  ref: "Post",
+  localField: "_id",
+  foreignField: "userId",
+  count: true,
+});
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

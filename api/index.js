@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
+const multer = require("multer");
 
 // it fixes express's error handler to work with async/await
 // we should remove this package and this line when Express v5 is released.
@@ -50,6 +51,30 @@ mongoose
 
 app.get("/", (req, res) => {
   res.send("Home Page");
+});
+const storage = multer.diskStorage({
+  destination: "public/uploads",
+  filename(req, file, cb) {
+    cb(null, `${file.originalname}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 * 1024 },
+}).single("file");
+
+app.post("/api/upload", (req, res) => {
+  upload(req, res, (err) => {
+    if (err) {
+      return res.status(400).json({
+        error: err.message,
+      });
+    }
+    return res.json({
+      filePath: `/uploads/${req.file.filename}`,
+    });
+  });
 });
 
 app.use("/api/users", userRouter);
