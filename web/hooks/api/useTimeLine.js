@@ -8,19 +8,22 @@ const useTimeLine = () => {
   const { user, userLoaded } = useAuth();
   const userId = user._id;
 
-  const { isLoading, isError, data, error, refetch } = useQuery(
-    "timeline",
-    async () => {
-      const { data } = await Axios.get(`/posts/${userId}/my-timeline`);
-      return data;
-    }
-  );
+  const {
+    isLoading,
+    isError,
+    data,
+    error,
+    refetch: timeLineRefetch,
+  } = useQuery("timeline", async () => {
+    const { data } = await Axios.get(`/posts/${userId}/my-timeline`);
+    return data;
+  });
 
   useEffect(() => {
     setTimeLine(data);
   }, [data]);
 
-  return { timeLine };
+  return { timeLine, timeLineRefetch };
 };
 
 export default useTimeLine;
