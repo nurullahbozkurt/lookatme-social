@@ -141,16 +141,31 @@ module.exports.userAllPosts = userAllPosts;
 const likePost = async (req, res) => {
   const post = await Post.findById(req.params.id);
 
-  try {
-    if (!post.likes.includes(req.user._id)) {
-      await post.updateOne({ $push: { likes: req.user._id } });
+  const posts = post.likes.map((like) => like.id).includes(req.user._id);
+
+  if (!posts && !post.likes.includes({ id: req.user._id })) {
+    try {
+      const whoLikedThePost = await User.findById(req.user._id);
+      await post.updateOne({
+        $push: {
+          likes: [{ id: req.user._id, img: whoLikedThePost.profilePicture }],
+        },
+      });
       res.status(200).json("Post liked !");
-    } else {
-      await post.updateOne({ $pull: { likes: req.user._id } });
-      res.status(200).json("Post disliked !");
+    } catch (err) {
+      res.status(500).json(err);
     }
-  } catch (err) {
-    res.status(500).json(err);
+  } else {
+    try {
+      const likes = post.likes.filter((like) => like.id !== req.user._id);
+      await post.updateOne({
+        likes,
+      });
+
+      res.status(200).json("Post disliked !");
+    } catch (err) {
+      res.status(500).json(err);
+    }
   }
 };
 

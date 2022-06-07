@@ -1,5 +1,16 @@
 const mongoose = require("mongoose");
 
+const LikesSchema = new mongoose.Schema({
+  id: {
+    type: String,
+    default: "",
+  },
+  img: {
+    type: String,
+    default: "",
+  },
+});
+
 const PostSchema = new mongoose.Schema(
   {
     userId: {
@@ -22,10 +33,9 @@ const PostSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    likes: {
-      type: Array,
-      default: [],
-    },
+    likes: [
+      { id: { type: String, default: "" }, img: { type: String, default: "" } },
+    ],
   },
   {
     timestamps: true,
