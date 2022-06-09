@@ -1,6 +1,8 @@
-const Post = require("../models/Post");
+const { Post } = require("../models/Post");
+const Likes = require("../models/Likes");
 const User = require("../models/User");
 const multer = require("multer");
+const { updateOne } = require("../models/Likes");
 
 const storage = multer.diskStorage({
   destination: "public/uploads",
@@ -22,8 +24,10 @@ const createPost = async (req, res) => {
   }
 
   const newPost = new Post(req.body);
+
   try {
     const savedPost = await newPost.save();
+
     res.status(200).json(savedPost);
   } catch (err) {
     res.status(500).json(err.message);
@@ -107,9 +111,13 @@ module.exports.deletePost = deletePost;
 //Get Post
 const getPost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate([
-      { path: "user", select: "-followers" },
-    ]);
+    const post = await Post.findById(req.params.id)
+      .populate({
+        path: "user",
+        select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+      })
+      .populate([{ path: "likes" }]);
+
     res.status(200).json(post);
   } catch (err) {
     res.status(500).json(err);
@@ -120,9 +128,10 @@ module.exports.getPost = getPost;
 //Get User All Posts
 const userAllPosts = async (req, res) => {
   const user = await User.findById(req.user._id);
-  const userPosts = await Post.find({ userId: req.params.id }).populate([
-    { path: "user", select: "-followers" },
-  ]);
+  const userPosts = await Post.find({ userId: req.params.id }).populate({
+    path: "user",
+    select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+  });
   if (!user) {
     return res.status(404).json("User not found !");
   }
@@ -140,29 +149,41 @@ module.exports.userAllPosts = userAllPosts;
 //Like and Dislike Post
 const likePost = async (req, res) => {
   const post = await Post.findById(req.params.id);
+  const Like = await Likes.find({ postId: post.id });
 
-  const posts = post.likes.map((like) => like.id).includes(req.user._id);
+  const likedControl = Like.some((like) => like.userId === req.user._id);
+  // const posts = post.likes.map((like) => like.id).includes(req.user._id);
 
-  if (!posts && !post.likes.includes({ id: req.user._id })) {
+  if (Like.length === 0 || !likedControl) {
     try {
-      const whoLikedThePost = await User.findById(req.user._id);
-      await post.updateOne({
-        $push: {
-          likes: [{ id: req.user._id, img: whoLikedThePost.profilePicture }],
-        },
+      const newLikes = new Likes({
+        userId: req.user._id,
+        postId: req.params.id,
       });
+      await newLikes.save();
+
       res.status(200).json("Post liked !");
+      // const whoLikedThePost = await User.findById(req.user._id);
+      // await post.updateOne({
+      //   $push: {
+      //     likes: [{ id: req.user._id, img: whoLikedThePost.profilePicture }],
+      //   },
+      // });
     } catch (err) {
       res.status(500).json(err);
     }
   } else {
     try {
-      const likes = post.likes.filter((like) => like.id !== req.user._id);
-      await post.updateOne({
-        likes,
+      await Likes.findOneAndDelete({
+        userId: req.user._id,
+        postId: req.params.id,
       });
 
       res.status(200).json("Post disliked !");
+      // const likes = post.likes.filter((like) => like.id !== req.user._id);
+      // await post.updateOne({
+      //   likes,
+      // });
     } catch (err) {
       res.status(500).json(err);
     }
@@ -174,6 +195,7 @@ module.exports.likePost = likePost;
 //Get My Timeline Posts
 const myTimeline = async (req, res) => {
   const user = await User.findById(req.params.id);
+
   if (!user) {
     return res.status(404).json("User not found !");
   }
@@ -183,16 +205,40 @@ const myTimeline = async (req, res) => {
 
   try {
     const me = await User.findById(req.user._id);
-    const mePost = await Post.find({ userId: me.id }).populate([
-      { path: "user", select: "-followers" },
-    ]);
+    const mePost = await Post.find({ userId: me.id })
+      .populate({
+        path: "user",
+        select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+      })
+      .populate({
+        path: "likes",
+        populate: {
+          path: "likedUser",
+          select: {
+            _id: 0,
+            coverPicture: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            isAdmin: 0,
+            following: 0,
+            followers: 0,
+          },
+        },
+      });
+
     const myfriends = me.following;
 
     const friendsPosts = await Promise.all(
       myfriends.map((friend) => {
-        return Post.find({ userId: friend }).populate([
-          { path: "user", select: "-followers" },
-        ]);
+        return Post.find({ userId: friend })
+          .populate({
+            path: "user",
+            select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+          })
+          .populate({
+            path: "likes",
+            populate: { path: "likedUser", select: { profilePicture: 1 } },
+          });
       })
     );
     if (mePost) {

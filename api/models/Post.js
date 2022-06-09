@@ -1,16 +1,5 @@
 const mongoose = require("mongoose");
 
-const LikesSchema = new mongoose.Schema({
-  id: {
-    type: String,
-    default: "",
-  },
-  img: {
-    type: String,
-    default: "",
-  },
-});
-
 const PostSchema = new mongoose.Schema(
   {
     userId: {
@@ -33,9 +22,9 @@ const PostSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    likes: [
-      { id: { type: String, default: "" }, img: { type: String, default: "" } },
-    ],
+    // likes: [
+    //   { id: { type: String, default: "" }, img: { type: String, default: "" } },
+    // ],
   },
   {
     timestamps: true,
@@ -57,6 +46,12 @@ PostSchema.virtual("user", {
   foreignField: "_id",
   justOne: true,
 });
+PostSchema.virtual("likes", {
+  ref: "Likes",
+  localField: "_id",
+  foreignField: "postId",
+  justOne: false,
+});
 
-const Post = mongoose.model("Post", PostSchema);
-module.exports = Post;
+const Post = mongoose.model("Post", PostSchema, "posts");
+module.exports = { Post };
