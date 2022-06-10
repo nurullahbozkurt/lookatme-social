@@ -60,14 +60,14 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    followers: {
-      type: Array,
-      default: [],
-    },
-    following: {
-      type: Array,
-      default: [],
-    },
+    // followers: {
+    //   type: Array,
+    //   default: [],
+    // },
+    // following: {
+    //   type: Array,
+    //   default: [],
+    // },
     isAdmin: {
       type: Boolean,
       default: false,
@@ -110,5 +110,17 @@ UserSchema.virtual("posts", {
   foreignField: "userId",
   count: true,
 });
+
+UserSchema.virtual("following", {
+  ref: "Following",
+  localField: "_id",
+  foreignField: "myId",
+});
+UserSchema.virtual("followers", {
+  ref: "Followers",
+  localField: "_id",
+  foreignField: "myId",
+});
+
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

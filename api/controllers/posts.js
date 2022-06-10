@@ -1,4 +1,5 @@
 const { Post } = require("../models/Post");
+const Following = require("../models/Following");
 const Likes = require("../models/Likes");
 const User = require("../models/User");
 const multer = require("multer");
@@ -178,12 +179,7 @@ const likePost = async (req, res) => {
         userId: req.user._id,
         postId: req.params.id,
       });
-
       res.status(200).json("Post disliked !");
-      // const likes = post.likes.filter((like) => like.id !== req.user._id);
-      // await post.updateOne({
-      //   likes,
-      // });
     } catch (err) {
       res.status(500).json(err);
     }
@@ -195,6 +191,7 @@ module.exports.likePost = likePost;
 //Get My Timeline Posts
 const myTimeline = async (req, res) => {
   const user = await User.findById(req.params.id);
+  const following = await Following.find({ myId: req.user._id });
 
   if (!user) {
     return res.status(404).json("User not found !");
@@ -208,41 +205,44 @@ const myTimeline = async (req, res) => {
     const mePost = await Post.find({ userId: me.id })
       .populate({
         path: "user",
-        select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+        select: { isAdmin: 0, createdAt: 0, updatedAt: 0 },
       })
       .populate({
         path: "likes",
         populate: {
           path: "likedUser",
           select: {
-            _id: 0,
             coverPicture: 0,
             createdAt: 0,
             updatedAt: 0,
             isAdmin: 0,
-            following: 0,
-            followers: 0,
           },
         },
       });
 
-    const myfriends = me.following;
-
     const friendsPosts = await Promise.all(
-      myfriends.map((friend) => {
-        return Post.find({ userId: friend })
+      following.map((follow) => {
+        return Post.find({ userId: follow.followingId })
           .populate({
             path: "user",
-            select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+            select: { isAdmin: 0, createdAt: 0, updatedAt: 0 },
           })
           .populate({
             path: "likes",
-            populate: { path: "likedUser", select: { profilePicture: 1 } },
+            populate: {
+              path: "likedUser",
+              select: {
+                coverPicture: 0,
+                createdAt: 0,
+                updatedAt: 0,
+                isAdmin: 0,
+              },
+            },
           });
       })
     );
     if (mePost) {
-      res.status(200).json(mePost.concat(...friendsPosts));
+      res.status(200).json(mePost.concat(...friendsPosts).reverse());
     }
     res.status(200).json(friendsPosts);
   } catch (err) {

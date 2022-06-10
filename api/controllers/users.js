@@ -1,6 +1,9 @@
-const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
+
+const User = require("../models/User");
+const Followers = require("../models/Followers");
+const Following = require("../models/Following");
 
 const storage = multer.diskStorage({
   destination: "public/uploads",
@@ -44,6 +47,7 @@ const getUpdateUser = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       $set: req.body,
     });
+
     res.status(200).json("User updated !");
   } catch (err) {
     res.status(404).json(err);
@@ -60,14 +64,12 @@ const postProfilePicture = (req, res) => {
           error: err.message,
         });
       }
-
       await User.updateOne(
         { _id: req.user._id },
         {
           profilePicture: req.file.path.replace("public/", ""),
         }
       );
-
       return res.json({
         message: "File uploaded",
         file: req.file,
@@ -115,7 +117,10 @@ module.exports.postCoverPicture = postCoverPicture;
 
 // Get User
 const getUser = async (req, res) => {
-  const user = await User.findById(req.user._id);
+  const user = await User.findById(req.user._id)
+    .populate("posts")
+    .populate({ path: "following", populate: { path: "user" } })
+    .populate({ path: "followers", populate: { path: "user" } });
   if (!user) {
     return res.status(404).json("User not found !");
   }
@@ -156,6 +161,9 @@ const followUser = async (req, res) => {
   const me = await User.findById(req.user._id);
   const otherUser = await User.findById(req.params.id);
 
+  const followers = await Followers.findOne({ followingId: req.params.id });
+  const following = await Following.findOne({ followingId: req.user._id });
+
   if (!me || !otherUser) {
     return res.status(404).json("User not found !");
   }
@@ -164,13 +172,31 @@ const followUser = async (req, res) => {
     return res.status(403).json("You can't follow yourself !");
   }
 
-  if (otherUser.followers.includes(req.user._id)) {
-    return res.status(403).json("You are already following this user !");
-  }
-  await otherUser.updateOne({ $push: { followers: req.user._id } });
-  await me.updateOne({ $push: { following: req.params.id } });
+  if (!followers && !following) {
+    console.log("ifi geçti");
+    try {
+      const newFollowing = new Following({
+        followingId: req.params.id,
+        myId: req.user._id,
+      });
+      await newFollowing.save();
+    } catch (err) {
+      res.status(500).json(err);
+    }
 
-  res.status(200).json("You are now following this user !");
+    try {
+      const newFollowers = new Followers({
+        myId: req.params.id,
+        followersId: req.user._id,
+      });
+      await newFollowers.save();
+    } catch (err) {
+      res.status(500).json(err);
+    }
+    res.status(200).json("You are now following this user !");
+  } else {
+    return res.status(403).json("You already follow this user !");
+  }
 };
 module.exports.followUser = followUser;
 
@@ -180,19 +206,41 @@ const unfollowUser = async (req, res) => {
   const me = await User.findById(req.user._id);
   const otherUser = await User.findById(req.params.id);
 
+  const followers = await Followers.findOne({ followingId: req.params.id });
+  const following = await Following.findOne({ followingId: req.user._id });
+
   if (!me || !otherUser) {
     return res.status(404).json("User not found !");
   }
 
   if (req.params.id === req.user._id) {
-    return res.status(403).json("You can't unfollow yourself !");
+    return res.status(403).json("You can't follow yourself !");
   }
-  if (!otherUser.followers.includes(req.user._id)) {
-    return res.status(403).json("You are not already following this user !");
-  }
-  await otherUser.updateOne({ $pull: { followers: req.user._id } });
-  await me.updateOne({ $pull: { following: req.params.id } });
 
-  res.status(200).json("You are not following this user !");
+  if (followers && following) {
+    console.log("ifi geçti");
+    try {
+      await Following.findOneAndDelete({
+        followingId: req.params.id,
+        myId: req.user._id,
+      });
+      res.status(200).json("You are now unfollowing this user !");
+    } catch (err) {
+      res.status(500).json(err);
+    }
+
+    try {
+      await Followers.findOneAndDelete({
+        myId: req.params.id,
+        followersId: req.user._id,
+      });
+      res.status(200).json("You are now unfollowing this user !");
+    } catch (err) {
+      res.status(500).json(err);
+    }
+    res.status(200).json("You are now unfollowing this user !");
+  } else {
+    return res.status(403).json("You are already unfollow this user !");
+  }
 };
 module.exports.unfollowUser = unfollowUser;
