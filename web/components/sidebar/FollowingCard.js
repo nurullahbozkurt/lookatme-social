@@ -2,7 +2,8 @@ import React from "react";
 import useGetUser from "../../hooks/api/useGetUser";
 
 const FollowingCard = () => {
-  const { user } = useGetUser();
+  const { user, isLoading, timeLineRefetch } = useGetUser();
+
   console.log("user", user);
   return (
     <>

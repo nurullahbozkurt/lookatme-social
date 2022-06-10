@@ -23,7 +23,7 @@ const useGetTimeline = () => {
     setTimeLine(data);
   }, [data]);
 
-  return { timeLine, timeLineRefetch };
+  return { timeLine, timeLineRefetch, isLoading };
 };
 
 export default useGetTimeline;

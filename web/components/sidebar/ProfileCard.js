@@ -6,6 +6,7 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import { IoHeartDislikeSharp } from "react-icons/io5";
 import userInfo from "../../data/userInfo";
 import { useRouter } from "next/router";
+import Loading from "../../components/Loading";
 
 import Axios from "../../lib/axios";
 import useGetUser from "../../hooks/api/useGetUser";
@@ -51,7 +52,9 @@ const ProfileCard = () => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) {
+    return <Loading />;
+  }
 
   return (
     <>

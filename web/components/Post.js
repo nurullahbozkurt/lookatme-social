@@ -9,25 +9,12 @@ import { useState, useEffect, useMemo } from "react";
 import Axios from "../lib/axios";
 import { useMutation } from "react-query";
 import { format } from "date-fns";
+import Loading from "./Loading";
 
 const TimeLinePost = () => {
-  const { timeLine, timeLineRefetch } = useGetTimeline();
+  const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
   const { localUser } = useAuth();
   const [postId, setPostId] = useState(null);
-
-  const iLike = useMemo(() => {
-    if (!timeLine) return;
-    return timeLine.map((post) => {
-      return post.likes.map((like) => {
-        return like.likedUser.some((me) => me.username === localUser.username);
-      });
-    })[0];
-  }, [timeLine]);
-
-  useEffect(() => {
-    handleLike();
-    setPostId(null);
-  }, [postId]);
 
   const fetchLike = useMutation(() => {
     return Axios.put(`/posts/${postId}/like`);
@@ -37,16 +24,23 @@ const TimeLinePost = () => {
     setPostId(postId);
   };
 
+  useEffect(() => {
+    if (!postId) return;
+    handleLike();
+  }, [postId]);
+
   const handleLike = async () => {
     if (!postId) return;
     try {
       await fetchLike.mutateAsync();
+      setPostId(null);
       timeLineRefetch();
     } catch (err) {
       console.log(err);
     }
   };
 
+  if (isLoading) return <Loading />;
   return (
     <>
       {timeLine?.map((post) => {
@@ -59,6 +53,8 @@ const TimeLinePost = () => {
 
         const dateFormat = new Date(post.createdAt); // dateStr you get from mongodb
         const date = format(dateFormat, "PPpp");
+
+        const iLike = post.likes.some((like) => like.userId === localUser._id);
 
         return (
           <>
@@ -106,35 +102,57 @@ const TimeLinePost = () => {
                 <div className="flex items-center justify-between border-y py-3 border-opacity-50">
                   <div className="flex items-center -space-x-1.5 max-w-[200px] overflow-scroll ">
                     {post.likes?.map((user) =>
-                      user.likedUser?.map((user) => (
-                        <>
-                          <div className="relative w-7 h-7 rounded-full overflow-hidden">
-                            <Image
-                              className="w-full h-full"
-                              alt=""
-                              src={user.profilePicture}
-                              objectFit="cover"
-                              layout="fill"
-                            ></Image>
-                          </div>
-                        </>
-                      ))
+                      user.likedUser?.map((user) => {
+                        return (
+                          <>
+                            <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                              <Image
+                                className="w-full h-full"
+                                alt=""
+                                src={user.profilePicture}
+                                objectFit="cover"
+                                layout="fill"
+                              ></Image>
+                            </div>
+                          </>
+                        );
+                      })
                     )}
                   </div>
                   <div className="flex items-end gap-2 text-2xl">
-                    <button
-                      onClick={() => clickLikeButton(post?.id)}
-                      className={`${
-                        iLike ? "text-primaryBlue" : ""
-                      } hover:text-primaryBlue/50`}
-                    >
-                      <div>
-                        <AiFillLike />
-                      </div>
-                    </button>
-                    <span className="text-sm font-bold text-gray-700/70">
-                      {post.likes.length}
-                    </span>
+                    {!fetchLike.isLoading && (
+                      <>
+                        <button
+                          onClick={() => clickLikeButton(post?.id)}
+                          className={`${
+                            iLike ? "text-primaryBlue" : ""
+                          } hover:text-primaryBlue/50`}
+                        >
+                          <div>
+                            <AiFillLike />
+                          </div>
+                        </button>
+                        <span className="text-sm font-bold text-gray-700/70">
+                          {post.likes?.length}
+                        </span>
+                      </>
+                    )}
+                    {fetchLike.isLoading && !fetchLike.isSuccess && (
+                      <>
+                        <button
+                          onClick={() => clickLikeButton(post?.id)}
+                          disabled={true}
+                          className={"text-primaryBlue/50"}
+                        >
+                          <div>
+                            <AiFillLike />
+                          </div>
+                        </button>
+                        <span className="text-sm font-bold text-gray-700/70">
+                          {post.likes?.length}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
                 <div>
