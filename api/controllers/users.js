@@ -161,8 +161,16 @@ const followUser = async (req, res) => {
   const me = await User.findById(req.user._id);
   const otherUser = await User.findById(req.params.id);
 
-  const followers = await Followers.findOne({ followingId: req.params.id });
-  const following = await Following.findOne({ followingId: req.user._id });
+  const followers = await Followers.findOne({
+    followersId: req.user._id,
+    myId: req.params.id,
+  });
+  const following = await Following.findOne({
+    followingId: req.params.id,
+    myId: req.user._id,
+  });
+  console.log("following", following);
+  console.log("followers", followers);
 
   if (!me || !otherUser) {
     return res.status(404).json("User not found !");
@@ -172,18 +180,20 @@ const followUser = async (req, res) => {
     return res.status(403).json("You can't follow yourself !");
   }
 
-  if (!followers && !following) {
-    console.log("ifi geçti");
+  if (!following) {
     try {
       const newFollowing = new Following({
         followingId: req.params.id,
         myId: req.user._id,
       });
       await newFollowing.save();
+      res.status(200).json("You are now following this user !");
     } catch (err) {
       res.status(500).json(err);
     }
-
+  }
+  if (!followers) {
+    console.log("gollowers çalıştı");
     try {
       const newFollowers = new Followers({
         myId: req.params.id,
@@ -193,10 +203,8 @@ const followUser = async (req, res) => {
     } catch (err) {
       res.status(500).json(err);
     }
-    res.status(200).json("You are now following this user !");
-  } else {
-    return res.status(403).json("You already follow this user !");
   }
+  res.status(200).json("User you are already following!");
 };
 module.exports.followUser = followUser;
 
@@ -206,8 +214,8 @@ const unfollowUser = async (req, res) => {
   const me = await User.findById(req.user._id);
   const otherUser = await User.findById(req.params.id);
 
-  const followers = await Followers.findOne({ followingId: req.params.id });
-  const following = await Following.findOne({ followingId: req.user._id });
+  const followers = await Followers.findOne({ followersId: req.user._id });
+  const following = await Following.findOne({ followingId: req.params.id });
 
   if (!me || !otherUser) {
     return res.status(404).json("User not found !");
@@ -217,18 +225,21 @@ const unfollowUser = async (req, res) => {
     return res.status(403).json("You can't follow yourself !");
   }
 
-  if (followers && following) {
-    console.log("ifi geçti");
+  if (following) {
     try {
       await Following.findOneAndDelete({
-        followingId: req.params.id,
         myId: req.user._id,
+        followingId: req.params.id,
       });
       res.status(200).json("You are now unfollowing this user !");
     } catch (err) {
       res.status(500).json(err);
     }
+  } else {
+    res.status(404).json("You are not following this user !");
+  }
 
+  if (followers) {
     try {
       await Followers.findOneAndDelete({
         myId: req.params.id,
@@ -238,9 +249,10 @@ const unfollowUser = async (req, res) => {
     } catch (err) {
       res.status(500).json(err);
     }
-    res.status(200).json("You are now unfollowing this user !");
   } else {
-    return res.status(403).json("You are already unfollow this user !");
+    res.status(200).json("You are not following this user !");
   }
+
+  res.status(200).json("User you are not already following !");
 };
 module.exports.unfollowUser = unfollowUser;
