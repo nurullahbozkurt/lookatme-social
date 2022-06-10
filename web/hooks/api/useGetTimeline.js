@@ -3,10 +3,10 @@ import { useQuery } from "react-query";
 import { useAuth } from "../../states/auth";
 import Axios from "../../lib/axios";
 
-const useTimeLine = () => {
+const useGetTimeline = () => {
   const [timeLine, setTimeLine] = useState(null);
-  const { user, userLoaded } = useAuth();
-  const userId = user._id;
+  const { localUser, userLoaded } = useAuth();
+  const userId = localUser._id;
 
   const {
     isLoading,
@@ -26,4 +26,4 @@ const useTimeLine = () => {
   return { timeLine, timeLineRefetch };
 };
 
-export default useTimeLine;
+export default useGetTimeline;

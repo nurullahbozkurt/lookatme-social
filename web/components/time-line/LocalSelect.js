@@ -1,11 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { useAuth } from "../../states/auth";
 import { Country, State, City } from "country-state-city";
-import { GoLocation } from "react-icons/go";
 import { useTimeline } from "../../states/timeline";
 
 const LocalSelect = () => {
-  const { user } = useAuth();
+  const { localUser } = useAuth();
   const { location, setLocation } = useTimeline();
 
   const cities = State.getAllStates();
@@ -23,14 +22,14 @@ const LocalSelect = () => {
 
   return (
     <div>
-      {user.country && (
+      {localUser.country && (
         <div className="text-sm">
           <h1 className="text-gray-500">
-            {user.country}, {user.city}
+            {localUser.country}, {localUser.city}
           </h1>
         </div>
       )}
-      {!user.country && (
+      {!localUser.country && (
         <>
           <div className="flex items-center border rounded border-primaryBlue overflow-hidden text-sm">
             <div>

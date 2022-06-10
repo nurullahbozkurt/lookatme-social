@@ -10,12 +10,14 @@ import { useTimeline } from "../../states/timeline";
 import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
 import LocalSelect from "./LocalSelect";
+import useGetTimeline from "../../hooks/api/useGetTimeline";
 
 const CreatePost = () => {
-  const { user } = useAuth();
+  const { localUser } = useAuth();
   const { location } = useTimeline();
+  const { timeLineRefetch } = useGetTimeline();
   const ref = useRef();
-  const userId = user._id;
+  const userId = localUser?._id;
 
   const [locationSelect, setLocationSelect] = useState(false);
 
@@ -30,8 +32,6 @@ const CreatePost = () => {
     country: "",
     city: "",
   });
-
-  console.log("post", post);
 
   const [image, setImage] = useState(null);
 
@@ -76,12 +76,14 @@ const CreatePost = () => {
       try {
         await fetchPost.mutateAsync();
         setPost({ ...post, desc: "", img: "" });
+        timeLineRefetch();
       } catch (err) {
         console.log(err);
       }
     } else {
       try {
         await fetchPost.mutateAsync();
+        timeLineRefetch();
       } catch (err) {
         console.log(err);
       }

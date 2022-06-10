@@ -1,7 +1,6 @@
 import PostModalContent from "./MyAllPosts";
 
 export default function MyAllPostsCard() {
-  console.log("MyAllPostsCard");
   return (
     <div className="w-full h-full ">
       <div className="border bg-white p-5 flex flex-col gap-5 shadow-md rounded">

@@ -4,11 +4,11 @@ import { useMutation } from "react-query";
 import { useAuth } from "../../states/auth";
 
 const useMyPosts = () => {
-  const { user, userLoaded } = useAuth();
+  const { localUser, userLoaded } = useAuth();
   const [myPosts, setMyPosts] = useState(null);
-  const userId = user._id;
+  const userId = localUser._id;
 
-  if (user && !userLoaded) {
+  if (localUser && !userLoaded) {
     const getMyPosts = useMutation(() => {
       return Axios.get(`/posts/${userId}/user-posts`);
     });

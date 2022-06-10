@@ -5,11 +5,11 @@ const TimelineContext = createContext();
 const useTimeline = () => useContext(TimelineContext);
 
 const TimelineProvider = ({ children }) => {
-  const { user, userLoaded } = useAuth();
+  const { localUser, userLoaded } = useAuth();
 
-  const userCountry = user?.country ? user.country : "";
+  const userCountry = localUser?.country ? localUser.country : "";
 
-  const userCity = user?.city ? user.city : "";
+  const userCity = localUser?.city ? localUser.city : "";
 
   const [location, setLocation] = useState({
     country: "",
@@ -18,7 +18,7 @@ const TimelineProvider = ({ children }) => {
 
   useEffect(() => {
     setLocation({ ...location, country: userCountry, city: userCity });
-  }, [userLoaded, user]);
+  }, [userLoaded, localUser]);
 
   return (
     <TimelineContext.Provider value={{ location, setLocation }}>

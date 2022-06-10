@@ -2,48 +2,49 @@ import { AiFillLike } from "react-icons/ai";
 import { FaHeart } from "react-icons/fa";
 import { BiSend } from "react-icons/bi";
 import { GoLocation } from "react-icons/go";
-import useTimeLine from "../hooks/api/useTimeLine";
+import useGetTimeline from "../hooks/api/useGetTimeline";
 import { useAuth } from "../states/auth";
 import Image from "next/image";
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Axios from "../lib/axios";
 import { useMutation } from "react-query";
+import { format } from "date-fns";
 
 const TimeLinePost = () => {
-  const { timeLine, timeLineRefetch } = useTimeLine();
-  const { user } = useAuth();
+  const { timeLine, timeLineRefetch } = useGetTimeline();
+  const { localUser } = useAuth();
   const [postId, setPostId] = useState(null);
-  const ref = useRef();
 
   const iLike = useMemo(() => {
-    return true;
-    // if (!timeLine) return;
-    // return timeLine.map((post) => {
-    //   return post.likes.id.some((like) => like === user._id);
-    // })[0];
+    if (!timeLine) return;
+    return timeLine.map((post) => {
+      return post.likes.map((like) => {
+        return like.likedUser.some((me) => me.username === localUser.username);
+      });
+    })[0];
   }, [timeLine]);
 
   useEffect(() => {
     handleLike();
+    setPostId(null);
   }, [postId]);
 
   const fetchLike = useMutation(() => {
     return Axios.put(`/posts/${postId}/like`);
   });
 
-  const clickLikeButton = (e) => {
-    setPostId(ref.current.value);
+  const clickLikeButton = (postId) => {
+    setPostId(postId);
   };
 
   const handleLike = async () => {
     if (!postId) return;
     try {
       await fetchLike.mutateAsync();
+      timeLineRefetch();
     } catch (err) {
       console.log(err);
     }
-    timeLineRefetch();
-    setPostId(null);
   };
 
   return (
@@ -56,36 +57,36 @@ const TimeLinePost = () => {
           ? post.user.job[0].toUpperCase() + post.user?.job.slice(1)
           : "";
 
-        console.log("post", post.likes);
-        // const whoLikedThePost = timeLine.map((post) => {
-        //   return post.likes.id.filter((like) => like);
-        // });
-        // console.log("whoLikedThePost", whoLikedThePost);
+        const dateFormat = new Date(post.createdAt); // dateStr you get from mongodb
+        const date = format(dateFormat, "PPpp");
 
         return (
           <>
             <div className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
-              <header className="flex items-center gap-3 pb-3 border-b">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                  <Image
-                    className="w-full h-full"
-                    alt=""
-                    src={post.user.profilePicture}
-                    objectFit="cover"
-                    layout="fill"
-                  ></Image>
-                </div>
-                <div className="flex flex-col">
-                  <h1 className="text-sm font-semibold">
-                    {name} {lastname}
-                  </h1>
-                  <div className="flex items-center gap-1 text-xs font-medium text-gray-500 text-opacity-80">
-                    <h1 className="">{job}</h1>
-                    <p className="flex items-center gap-0.5">
-                      <GoLocation /> {post.user.country} , {post.user.city}
-                    </p>
+              <header className="w-full flex items-end justify-between gap-3 pb-3 border-b">
+                <div className="flex items-center gap-3">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                    <Image
+                      className="w-full h-full"
+                      alt=""
+                      src={post.user.profilePicture}
+                      objectFit="cover"
+                      layout="fill"
+                    ></Image>
+                  </div>
+                  <div className="flex flex-col">
+                    <h1 className="text-sm font-semibold">
+                      {name} {lastname}
+                    </h1>
+                    <div className="flex items-center gap-1 text-xs font-medium text-gray-500 text-opacity-80">
+                      <h1 className="">{job}</h1>
+                      <p className="flex items-center gap-0.5">
+                        <GoLocation /> {post.country} , {post.city}
+                      </p>
+                    </div>
                   </div>
                 </div>
+                <div className="text-xs">{date}</div>
               </header>
               <main className="w-full flex flex-col gap-4">
                 <div className="flex w-full max-h-[400px] rounded overflow-hidden ">
@@ -104,28 +105,35 @@ const TimeLinePost = () => {
                 </div>
                 <div className="flex items-center justify-between border-y py-3 border-opacity-50">
                   <div className="flex items-center -space-x-1.5 max-w-[200px] overflow-scroll ">
-                    <div className="relative w-7 h-7 rounded-full overflow-hidden">
-                      <Image
-                        className="w-full h-full"
-                        alt=""
-                        src={post.user.profilePicture}
-                        objectFit="cover"
-                        layout="fill"
-                      ></Image>
-                    </div>
+                    {post.likes?.map((user) =>
+                      user.likedUser?.map((user) => (
+                        <>
+                          <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                            <Image
+                              className="w-full h-full"
+                              alt=""
+                              src={user.profilePicture}
+                              objectFit="cover"
+                              layout="fill"
+                            ></Image>
+                          </div>
+                        </>
+                      ))
+                    )}
                   </div>
                   <div className="flex items-end gap-2 text-2xl">
-                    <input ref={ref} value={post.id} className="hidden" />
                     <button
-                      onClick={clickLikeButton}
+                      onClick={() => clickLikeButton(post?.id)}
                       className={`${
                         iLike ? "text-primaryBlue" : ""
                       } hover:text-primaryBlue/50`}
                     >
-                      <AiFillLike />
+                      <div>
+                        <AiFillLike />
+                      </div>
                     </button>
                     <span className="text-sm font-bold text-gray-700/70">
-                      {post.likes.id.length}
+                      {post.likes.length}
                     </span>
                   </div>
                 </div>

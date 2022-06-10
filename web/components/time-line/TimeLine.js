@@ -6,7 +6,6 @@ const TimeLine = () => {
     <div className="w-full flex flex-col gap-5">
       <CreatePost />
       <Post />
-      {/* <Post /> */}
     </div>
   );
 };

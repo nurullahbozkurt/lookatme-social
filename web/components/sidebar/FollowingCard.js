@@ -1,6 +1,9 @@
 import React from "react";
+import useGetUser from "../../hooks/api/useGetUser";
 
 const FollowingCard = () => {
+  const { user } = useGetUser();
+  console.log("user", user);
   return (
     <>
       <div className="w-full border bg-white p-7 flex flex-col items-center justify-center gap-5 shadow-md rounded">
