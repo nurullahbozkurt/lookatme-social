@@ -8,6 +8,8 @@ const FollowingCard = () => {
   const { user, isLoading } = useGetUser();
   const [changeFollow, setChangeFollow] = useState(false);
 
+  console.log("user", user);
+
   const handleChangeFollow = () => {
     setChangeFollow(!changeFollow);
   };
@@ -40,7 +42,7 @@ const FollowingCard = () => {
               className="flex items-center gap-1 opacity-60 hover:opacity-90"
             >
               <h1 className="text-xs">
-                {!changeFollow ? "Following" : "Followers"}
+                {!changeFollow ? "Followers" : "Following"}
               </h1>
               <div>
                 {" "}
@@ -51,9 +53,9 @@ const FollowingCard = () => {
         </div>
         <div className="w-full flex items-center gap-[10px] overflow-x-scroll">
           {!changeFollow &&
-            user.following.map((user) => (
+            user.following.map((user, index) => (
               <>
-                <div className="flex flex-col items-center">
+                <div key={index} className="flex flex-col items-center">
                   <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
                     <Image
                       className="w-full h-full"
@@ -73,9 +75,9 @@ const FollowingCard = () => {
               </>
             ))}
           {changeFollow &&
-            user.followers.map((user) => (
+            user.followers.map((user, index) => (
               <>
-                <div className="flex flex-col items-center">
+                <div key={index} className="flex flex-col items-center">
                   <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
                     <Image
                       className="w-full h-full"

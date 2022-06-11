@@ -42,9 +42,11 @@ const LocalSelect = () => {
                 <option defaultValue={"Select A Country"}>
                   Select A Country
                 </option>
-                {countries.map((country) => (
+                {countries.map((country, index) => (
                   <>
-                    <option value={country.name}>{country.name}</option>
+                    <option key={index} value={country.name}>
+                      {country.name}
+                    </option>
                   </>
                 ))}
               </select>
@@ -57,9 +59,11 @@ const LocalSelect = () => {
                 }
               >
                 <option defaultValue={"Select A City"}>Select A City</option>
-                {selectCity?.map((city) => (
+                {selectCity?.map((city, index) => (
                   <>
-                    <option value={city.name}>{city.name}</option>
+                    <option key={index} value={city.name}>
+                      {city.name}
+                    </option>
                   </>
                 ))}
               </select>

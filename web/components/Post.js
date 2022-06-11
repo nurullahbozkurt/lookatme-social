@@ -10,29 +10,56 @@ import Axios from "../lib/axios";
 import { useMutation } from "react-query";
 import { format } from "date-fns";
 import Loading from "./Loading";
+import userInfo from "../data/userInfo";
+import { AiFillCloseCircle } from "react-icons/ai";
 
 const TimeLinePost = () => {
-  const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
   const { localUser } = useAuth();
   const [postId, setPostId] = useState(null);
+  const [commentLikeId, setCommentLikeID] = useState(null);
+  const [commentDeleteId, setCommentDeleteId] = useState(null);
+  const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
+  const [comment, setComment] = useState({
+    postId: null,
+    comment: null,
+  });
+
+  console.log("timeLine", timeLine);
+
+  // fetch function
 
   const fetchLike = useMutation(() => {
     return Axios.put(`/posts/${postId}/like`);
+  });
+  const fetchCommentLike = useMutation(() => {
+    return Axios.post(`/posts/${commentLikeId}/comment-like`);
+  });
+
+  const fetchComment = useMutation(() => {
+    return Axios.post(`/posts/${comment.postId}/comment`, {
+      comment: comment.comment,
+    });
+  });
+  const fetchCommentDelete = useMutation(() => {
+    return Axios.delete(`/posts/${commentDeleteId}/comment`);
   });
 
   const clickLikeButton = (postId) => {
     setPostId(postId);
   };
+  const clickCommentLikeButton = (commentId) => {
+    setCommentLikeID(commentId);
+  };
+  const clickDeleteMyCommentButton = (commentId) => {
+    setCommentDeleteId(commentId);
+  };
 
-  useEffect(() => {
-    if (!postId) return;
-    handleLike();
-  }, [postId]);
+  // handle function for post
 
-  const handleLike = async () => {
+  const handleLike = () => {
     if (!postId) return;
     try {
-      await fetchLike.mutateAsync();
+      fetchLike.mutateAsync();
       setPostId(null);
       timeLineRefetch();
     } catch (err) {
@@ -40,28 +67,81 @@ const TimeLinePost = () => {
     }
   };
 
+  const handleCommentLike = () => {
+    if (!commentLikeId) return;
+    try {
+      fetchCommentLike.mutateAsync();
+      setCommentLikeID(null);
+      timeLineRefetch();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleDeleteMyComment = () => {
+    if (!commentDeleteId) return;
+    try {
+      fetchCommentDelete.mutateAsync();
+      setCommentDeleteId(null);
+      timeLineRefetch();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const sendComment = (e) => {
+    e.preventDefault();
+    try {
+      fetchComment.mutateAsync();
+      setComment({
+        postId: null,
+        comment: "",
+      });
+      timeLineRefetch();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // useEffects
+
+  useEffect(() => {
+    if (!postId) return;
+    handleLike();
+  }, [postId]);
+
+  useEffect(() => {
+    if (!commentLikeId) return;
+    handleCommentLike();
+  }, [commentLikeId]);
+
+  useEffect(() => {
+    if (!commentDeleteId) return;
+    handleDeleteMyComment();
+  }, [commentDeleteId]);
+
   if (isLoading) return <Loading />;
   return (
     <>
-      {timeLine?.map((post) => {
-        const name = post.user.name[0].toUpperCase() + post.user.name.slice(1);
-        const lastname =
-          post.user.lastName[0].toUpperCase() + post.user.lastName.slice(1);
-        const job = post.user?.job
-          ? post.user.job[0].toUpperCase() + post.user?.job.slice(1)
-          : "";
+      {timeLine?.map((post, index) => {
+        const { name, lastname, job } = userInfo(post.user);
 
         const dateFormat = new Date(post.createdAt); // dateStr you get from mongodb
         const date = format(dateFormat, "PPpp");
 
-        const iLike = post.likes.some((like) => like.userId === localUser._id);
+        const iLikePost = post.likes.some(
+          (like) => like.userId === localUser._id
+        );
 
         return (
           <>
-            <div className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
+            <div
+              key={index}
+              className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded"
+            >
               <header className="w-full flex items-end justify-between gap-3 pb-3 border-b">
                 <div className="flex items-center gap-3">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <div className="relative w-10 h-10 rounded-full overflow-hidden">
                     <Image
                       className="w-full h-full"
                       alt=""
@@ -101,11 +181,14 @@ const TimeLinePost = () => {
                 </div>
                 <div className="flex items-center justify-between border-y py-3 border-opacity-50">
                   <div className="flex items-center -space-x-1.5 max-w-[200px] overflow-scroll ">
-                    {post.likes?.map((user) =>
+                    {post.likes?.map((user, index) =>
                       user.likedUser?.map((user) => {
                         return (
                           <>
-                            <div className="relative w-7 h-7 rounded-full overflow-hidden">
+                            <div
+                              key={index}
+                              className="relative w-7 h-7 rounded-full overflow-hidden"
+                            >
                               <Image
                                 className="w-full h-full"
                                 alt=""
@@ -125,7 +208,7 @@ const TimeLinePost = () => {
                         <button
                           onClick={() => clickLikeButton(post?.id)}
                           className={`${
-                            iLike ? "text-primaryBlue" : ""
+                            iLikePost ? "text-primaryBlue" : ""
                           } hover:text-primaryBlue/50`}
                         >
                           <div>
@@ -155,71 +238,101 @@ const TimeLinePost = () => {
                     )}
                   </div>
                 </div>
-                <div>
-                  <div className="text-sm font-semibold">
-                    <p>
-                      Comments :<span className="text-textColor/80"> 57</span>
-                    </p>
-                  </div>
-                  <div className="flex flex-col py-2">
-                    <div className="w-full flex gap-3 py-3">
-                      <div className="">
-                        <img
-                          className="w-10 h-10 rounded-full "
-                          src="https://i.picsum.photos/id/1027/200/200.jpg?hmac=fiXlkLLwYm7JmmU80uRIj9g21XD4q9v_lM_2Z57UhuA"
-                          alt="Rounded avatar"
-                        />
-                      </div>
-                      <div className="flex-1 relative flex flex-col gap-1 bg-gray-100 rounded-lg p-3 text-sm">
-                        <h1 className="font-bold text-[15px]">Lara Onjova</h1>
-                        <p>
-                          Simply dummy text of the printing and typesetting
-                          industry. Lorem Ipsum has been the industry's standard
-                          dummy text ever since the. Lorem Ipsum is simply dummy
-                          text of the printing and typesetting industry.
-                        </p>
-                        <div className="absolute -bottom-2 -right-2">
-                          <div className="flex items-center gap-2 rounded-full border py-0.5 px-2 bg-white">
-                            <div className="text-xs text-textColor/70 font-bold">
-                              <p>8</p>
-                            </div>
-                            <button className="text-xl text-red-700 hover:text-red-600">
-                              <FaHeart />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="w-full flex gap-3 py-3">
-                      <div className="">
-                        <img
-                          className="w-10 h-10 rounded-full "
-                          src="https://images.unsplash.com/photo-1638708644743-2502f38000a0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80"
-                          alt="Rounded avatar"
-                        />
-                      </div>
-                      <div className="flex-1 relative flex flex-col gap-1 bg-gray-100 rounded-lg p-3 text-sm">
-                        <h1 className="font-bold text-[15px]">Nora Kritoma</h1>
-                        <p>
-                          Simply dummy text of the printing and typesetting
-                          industry. Lorem Ipsum has been the industry's standard
-                          dummy text ever since the. Lorem Ipsum is simply dummy
-                          text of the printing and typesetting industry.
-                        </p>
-                        <div className="absolute -bottom-2 -right-2">
-                          <div className="flex items-center gap-2 rounded-full border py-0.5 px-2 bg-white">
-                            <div className="text-xs text-textColor/70 font-bold">
-                              <p>12</p>
-                            </div>
-                            <button className="text-xl text-red-700 hover:text-red-600">
-                              <FaHeart />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                <div className="text-sm font-semibold">
+                  <p>
+                    Comments :
+                    <span className="text-textColor/80">
+                      {" "}
+                      {post.comments.length}
+                    </span>
+                  </p>
                 </div>
+                {post.comments.map((comment, index) => {
+                  const { name, lastname } = userInfo(comment.user[0]);
+                  const meComment =
+                    comment.userWhoCommentedId === localUser._id;
+
+                  const iLikeComment = comment.commentLikes.some((like) => {
+                    return like.userId === localUser._id;
+                  });
+
+                  console.log("meComment", meComment);
+                  return (
+                    <>
+                      <div key={index}>
+                        <div className="flex flex-col ">
+                          <div className="w-full items-center flex gap-3">
+                            <div className="">
+                              {!meComment && (
+                                <div
+                                  className={`relative w-10 h-10 rounded-full overflow-hidden`}
+                                >
+                                  <Image
+                                    className="w-full h-full"
+                                    alt=""
+                                    src={comment.user[0].profilePicture}
+                                    objectFit="cover"
+                                    layout="fill"
+                                  ></Image>
+                                </div>
+                              )}
+                            </div>
+                            <div className="group flex-1 relative flex flex-col gap-1 bg-gray-100 rounded-lg p-3 text-sm">
+                              <div className="flex items-center justify-between">
+                                <h1 className="font-bold text-[15px]">
+                                  {name} {lastname}
+                                </h1>
+                                {meComment && (
+                                  <button
+                                    onClick={() =>
+                                      clickDeleteMyCommentButton(comment.id)
+                                    }
+                                    className="hidden group-hover:block text-red-700 text-lg"
+                                  >
+                                    <AiFillCloseCircle />
+                                  </button>
+                                )}
+                              </div>
+                              <p>{comment.comment}</p>
+                              <div className="absolute -bottom-2 -right-2">
+                                <div className="flex items-center gap-2 rounded-full border py-0.5 px-2 bg-white">
+                                  <div className="text-xs text-textColor/70 font-bold">
+                                    <p>{comment.commentLikes.length}</p>
+                                  </div>
+                                  <button
+                                    onClick={() =>
+                                      clickCommentLikeButton(comment.id)
+                                    }
+                                    className={`${
+                                      iLikeComment ? "text-red-700" : ""
+                                    } text-xl  hover:text-red-700/50`}
+                                  >
+                                    <FaHeart />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="">
+                              {meComment && (
+                                <div
+                                  className={` relative w-10 h-10 rounded-full overflow-hidden`}
+                                >
+                                  <Image
+                                    className="w-full h-full"
+                                    alt=""
+                                    src={comment.user[0].profilePicture}
+                                    objectFit="cover"
+                                    layout="fill"
+                                  ></Image>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })}
                 <div className="flex items-center gap-5">
                   <div>
                     <img
@@ -228,17 +341,29 @@ const TimeLinePost = () => {
                       alt="Rounded avatar"
                     />
                   </div>
-                  <div className="flex-1 relative">
+                  <form className="flex-1 relative">
                     <input
+                      onChange={(e) =>
+                        setComment({
+                          ...comment,
+                          comment: e.target.value,
+                          postId: post.id,
+                        })
+                      }
+                      value={comment?.comment}
                       placeholder="Post a comment.."
                       className="w-full bg-gray-100/70 px-2 py-1.5 rounded-full placeholder:text-sm"
                     />
                     <div className="absolute bottom-2 right-2 ">
-                      <button className="flex items-center text-xl hover:text-primaryBlue">
+                      <button
+                        type="submit"
+                        onClick={(e) => sendComment(e)}
+                        className="flex items-center text-xl hover:text-primaryBlue"
+                      >
                         <BiSend />
                       </button>
                     </div>
-                  </div>
+                  </form>
                 </div>
               </main>
             </div>

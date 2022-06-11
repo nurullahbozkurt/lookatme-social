@@ -180,9 +180,9 @@ const Register = () => {
                         <option defaultValue={"Choose a country"}>
                           Choose a country
                         </option>
-                        {countries.map((country) => (
+                        {countries.map((country, index) => (
                           <>
-                            <option value={country.name}>
+                            <option key={index} value={country.name}>
                               {country.name} {country.flag}
                             </option>
                           </>
@@ -204,9 +204,11 @@ const Register = () => {
                         <option defaultValue={"Choose a country"}>
                           Choose a country
                         </option>
-                        {selectCity?.map((city) => (
+                        {selectCity?.map((city, index) => (
                           <>
-                            <option value={city.name}>{city.name}</option>
+                            <option key={index} value={city.name}>
+                              {city.name}
+                            </option>
                           </>
                         ))}
                       </select>

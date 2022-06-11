@@ -5,7 +5,6 @@ import useMyAllPosts from "../../hooks/api/useGetMyAllPosts";
 import Loading from "../Loading";
 export default function MyAllPostsCard() {
   const { myPosts, isLoading } = useMyAllPosts();
-  console.log("myPosts", myPosts);
 
   if (isLoading)
     return (
@@ -18,16 +17,19 @@ export default function MyAllPostsCard() {
       <div className="border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
         <div className="w-full font-semibold">
           <div className="flex items-center gap-1">
-            <h1>Following</h1>
+            <h1>My Posts</h1>
             <div className="rounded-full flex items-center justify-center bg-primaryGreen text-white p-0.5 w-4 h-4">
               <p className="text-xs"> {myPosts.length}</p>
             </div>
           </div>
         </div>
         <div className="w-full overflow-x-scroll flex gap-5  ">
-          {myPosts.map((post) => (
+          {myPosts.map((post, index) => (
             <>
-              <div className="relative group min-w-[210px] h-[190px] overflow-hidden rounded cursor-pointer group-hover:text-gray-200 shadow-avatarShadow ">
+              <div
+                key={index}
+                className="relative group min-w-[210px] h-[190px] overflow-hidden rounded cursor-pointer group-hover:text-gray-200 shadow-avatarShadow "
+              >
                 <div className="relative w-full h-full overflow-hidden">
                   <Image
                     className="w-full h-full"
