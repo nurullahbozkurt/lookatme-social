@@ -4,6 +4,8 @@ const Likes = require("../models/Likes");
 const User = require("../models/User");
 const multer = require("multer");
 const { updateOne } = require("../models/Likes");
+const Comments = require("../models/Comments");
+const CommentLikes = require("../models/CommentLikes");
 
 const storage = multer.diskStorage({
   destination: "public/uploads",
@@ -117,7 +119,20 @@ const getPost = async (req, res) => {
         path: "user",
         select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
       })
-      .populate([{ path: "likes" }]);
+      .populate([{ path: "likes" }])
+      .populate({
+        path: "comments",
+        populate: [
+          {
+            path: "commentLikes",
+            model: "CommentLikes",
+          },
+          {
+            path: "user",
+            model: "User",
+          },
+        ],
+      });
 
     res.status(200).json(post);
   } catch (err) {
@@ -188,6 +203,85 @@ const likePost = async (req, res) => {
 
 module.exports.likePost = likePost;
 
+//Comment Post
+const commentPost = async (req, res) => {
+  const post = await Post.findById(req.params.id);
+
+  try {
+    const newComment = new Comments({
+      userWhoCommentedId: req.user._id,
+      postId: post._id,
+      comment: req.body.comment,
+    });
+    await newComment.save();
+    res.status(200).json("Comment added !");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+module.exports.commentPost = commentPost;
+
+// Delete Comment
+const deleteComment = async (req, res) => {
+  const comment = await Comments.findById(req.params.id);
+  if (!comment) {
+    return res.status(404).json("Comment not found !");
+  }
+  try {
+    await Comments.findOneAndDelete({
+      userWhoCommentedId: req.user._id,
+      _id: req.params.id,
+    });
+    res.status(200).json("Comment deleted !");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+  try {
+    await CommentLikes.findOneAndDelete({
+      userId: req.user._id,
+      commentId: req.params.id,
+    });
+    res.status(200).json("Comment disliked !");
+  } catch (err) {
+    res.status(500).json(err);
+  }
+};
+module.exports.deleteComment = deleteComment;
+
+// Like to Post's Comment
+const likeComment = async (req, res) => {
+  const comment = await Comments.findById(req.params.id);
+  const Like = await CommentLikes.find({ commentId: comment._id });
+  console.log("Like", Like);
+  console.log("comment", comment);
+
+  if (Like.length === 0) {
+    try {
+      const newLikes = new CommentLikes({
+        userId: req.user._id,
+        commentId: comment._id,
+      });
+      await newLikes.save();
+
+      res.status(200).json("Comment liked !");
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+  if (Like.length !== 0) {
+    try {
+      await CommentLikes.findOneAndDelete({
+        userId: req.user._id,
+        commentId: req.params.id,
+      });
+      res.status(200).json("Comment disliked !");
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  }
+};
+module.exports.likeComment = likeComment;
+
 //Get My Timeline Posts
 const myTimeline = async (req, res) => {
   const user = await User.findById(req.params.id);
@@ -218,6 +312,19 @@ const myTimeline = async (req, res) => {
             isAdmin: 0,
           },
         },
+      })
+      .populate({
+        path: "comments",
+        populate: [
+          {
+            path: "commentLikes",
+            model: "CommentLikes",
+          },
+          {
+            path: "user",
+            model: "User",
+          },
+        ],
       });
 
     const friendsPosts = await Promise.all(
@@ -238,6 +345,19 @@ const myTimeline = async (req, res) => {
                 isAdmin: 0,
               },
             },
+          })
+          .populate({
+            path: "comments",
+            populate: [
+              {
+                path: "commentLikes",
+                model: "CommentLikes",
+              },
+              {
+                path: "user",
+                model: "User",
+              },
+            ],
           });
       })
     );

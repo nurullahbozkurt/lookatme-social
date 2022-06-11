@@ -46,8 +46,16 @@ PostSchema.virtual("user", {
   foreignField: "_id",
   justOne: true,
 });
+
 PostSchema.virtual("likes", {
   ref: "Likes",
+  localField: "_id",
+  foreignField: "postId",
+  justOne: false,
+});
+
+PostSchema.virtual("comments", {
+  ref: "Comments",
   localField: "_id",
   foreignField: "postId",
   justOne: false,

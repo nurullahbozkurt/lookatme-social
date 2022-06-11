@@ -20,6 +20,15 @@ router.delete("/:id", validateLogin.verifyToken, Posts.deletePost);
 //Like Post
 router.put("/:id/like", validateLogin.verifyToken, Posts.likePost);
 
+// Comment Post
+router.post("/:id/comment", validateLogin.verifyToken, Posts.commentPost);
+
+// Delete Comment
+router.delete("/:id/comment/", validateLogin.verifyToken, Posts.deleteComment);
+
+// Like to Post's Comment
+router.post("/:id/comment-like", validateLogin.verifyToken, Posts.likeComment);
+
 //Get Post
 router.get("/:id", Posts.getPost);
 
