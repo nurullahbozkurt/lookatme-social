@@ -130,8 +130,8 @@ module.exports.getPost = getPost;
 const userAllPosts = async (req, res) => {
   const user = await User.findById(req.user._id);
   const userPosts = await Post.find({ userId: req.params.id }).populate({
-    path: "user",
-    select: { isAdmin: 0, createdAt: 0, updatedAt: 0, _id: 0 },
+    path: "likes",
+    populate: { path: "likedUser" },
   });
   if (!user) {
     return res.status(404).json("User not found !");
