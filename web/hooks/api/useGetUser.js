@@ -1,10 +1,13 @@
 import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
 import { useQuery } from "react-query";
+import { useMemo } from "react";
 
 const useGetUser = () => {
   const { localUser } = useAuth();
-  const userId = localUser?._id;
+  const userId = useMemo(() => {
+    return localUser?._id;
+  }, [localUser]);
 
   const {
     isLoading,

@@ -1,67 +1,99 @@
-import React from "react";
+import Image from "next/image";
+import { useState } from "react";
 import useGetUser from "../../hooks/api/useGetUser";
+import Loading from "../Loading";
+import { IoIosArrowForward } from "react-icons/io";
 
 const FollowingCard = () => {
-  const { user, isLoading, timeLineRefetch } = useGetUser();
+  const { user, isLoading } = useGetUser();
+  const [changeFollow, setChangeFollow] = useState(false);
 
-  console.log("user", user);
+  const handleChangeFollow = () => {
+    setChangeFollow(!changeFollow);
+  };
+
+  if (isLoading)
+    return (
+      <div>
+        <Loading />
+      </div>
+    );
   return (
     <>
       <div className="w-full border bg-white p-7 flex flex-col items-center justify-center gap-5 shadow-md rounded">
         <div className="w-full font-semibold">
-          <h1>Following</h1>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-1">
+              <h1>{!changeFollow ? "Following" : "Followers"}</h1>{" "}
+              <div className="rounded-full flex items-center justify-center bg-primaryGreen text-white p-0.5 w-5 h-5">
+                <p className="text-sm">
+                  {" "}
+                  {!changeFollow
+                    ? user.following.length
+                    : user.followers.length}
+                </p>
+              </div>
+            </div>
+            <div
+              role="button"
+              onClick={handleChangeFollow}
+              className="flex items-center gap-1 opacity-60 hover:opacity-90"
+            >
+              <h1 className="text-xs">
+                {!changeFollow ? "Following" : "Followers"}
+              </h1>
+              <div>
+                {" "}
+                <IoIosArrowForward />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="w-full flex items-center gap-2 overflow-x-scroll">
-          <div className="w-full">
-            <div className="w-full">
-              <img
-                className="min-w-[64px] h-16 rounded-full "
-                src="https://images.unsplash.com/photo-1638612913771-8f00622b96fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80"
-                alt="Rounded avatar"
-              />
-            </div>
-            <p className="text-xs font-bold opacity-90">Lara</p>
-          </div>
-          <div className="w-full">
-            <div className="w-full">
-              <img
-                className="min-w-[64px] h-16 rounded-full "
-                src="https://images.unsplash.com/photo-1638649602320-450b717fa622?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80"
-                alt="Rounded avatar"
-              />
-            </div>
-            <p className="text-xs font-bold opacity-90">Nora</p>
-          </div>
-          <div className="w-full">
-            <div className="w-full">
-              <img
-                className="min-w-[64px] h-16 rounded-full "
-                src="https://images.unsplash.com/photo-1638708644743-2502f38000a0?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80"
-                alt="Rounded avatar"
-              />
-            </div>
-            <p className="text-xs font-bold opacity-90">Lara</p>
-          </div>
-          <div className="w-full">
-            <div className="w-full">
-              <img
-                className="min-w-[64px] h-16 rounded-full "
-                src="https://i.picsum.photos/id/1027/200/200.jpg?hmac=fiXlkLLwYm7JmmU80uRIj9g21XD4q9v_lM_2Z57UhuA"
-                alt="Rounded avatar"
-              />
-            </div>
-            <p className="text-xs font-bold opacity-90">Vrej</p>
-          </div>
-          <div className="w-full">
-            <div className="w-full">
-              <img
-                className="min-w-[64px] h-16 rounded-full "
-                src="https://images.unsplash.com/photo-1638612913771-8f00622b96fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=200&h=200&q=80"
-                alt="Rounded avatar"
-              />
-            </div>
-            <p className="text-xs font-bold opacity-90">Vrej</p>
-          </div>
+        <div className="w-full flex items-center gap-[10px] overflow-x-scroll">
+          {!changeFollow &&
+            user.following.map((user) => (
+              <>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                    <Image
+                      className="w-full h-full"
+                      alt=""
+                      src={user.user[0].profilePicture}
+                      objectFit="cover"
+                      layout="fill"
+                      width={600}
+                      height={350}
+                    ></Image>
+                  </div>
+                  <p className="text-xs font-bold opacity-90">
+                    {user.user[0].name[0].toUpperCase() +
+                      user.user[0].name.slice(1)}
+                  </p>
+                </div>
+              </>
+            ))}
+          {changeFollow &&
+            user.followers.map((user) => (
+              <>
+                <div className="flex flex-col items-center">
+                  <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                    <Image
+                      className="w-full h-full"
+                      alt=""
+                      src={user.user[0].profilePicture}
+                      objectFit="cover"
+                      layout="fill"
+                      width={600}
+                      height={350}
+                    ></Image>
+                  </div>
+                  <p className="text-xs font-bold opacity-90">
+                    {user.user[0].name[0].toUpperCase() +
+                      user.user[0].name.slice(1)}
+                  </p>
+                </div>
+              </>
+            ))}
         </div>
       </div>
     </>
