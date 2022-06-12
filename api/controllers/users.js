@@ -20,7 +20,10 @@ const upload = multer({
 //Get All Users
 const getAllUsers = async (req, res) => {
   try {
-    const allUsers = await User.find();
+    const allUsers = await User.find()
+      .populate("posts")
+      .populate({ path: "following", populate: { path: "user" } })
+      .populate({ path: "followers", populate: { path: "user" } });
     res.status(200).json(allUsers);
   } catch (err) {
     res.status(500).json(err);
