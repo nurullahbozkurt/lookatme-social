@@ -137,6 +137,7 @@ const TimeLinePost = () => {
           <>
             <div
               key={index}
+              id={post._id}
               className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded"
             >
               <header className="w-full flex items-end justify-between gap-3 pb-3 border-b">

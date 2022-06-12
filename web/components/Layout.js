@@ -3,7 +3,7 @@ import Navbar from "./Navbar";
 
 const Layout = ({ children }) => {
   return (
-    <div>
+    <div className="relative w-full">
       <div className="sticky top-0 z-10">
         <Navbar />
       </div>

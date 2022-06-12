@@ -9,12 +9,15 @@ const useMyPosts = () => {
     return localUser?.id;
   }, [localUser]);
 
-  const { data, isLoading } = useQuery("useGetMyAllPosts", async () => {
-    const { data } = await Axios.get(`/posts/${userId}/user-posts`);
-    return data;
-  });
+  const { data, isLoading, refetch } = useQuery(
+    "useGetMyAllPosts",
+    async () => {
+      const { data } = await Axios.get(`/posts/${userId}/user-posts`);
+      return data;
+    }
+  );
 
-  return { myPosts: data, isLoading };
+  return { myPosts: data, isLoading, refetch };
 };
 
 export default useMyPosts;

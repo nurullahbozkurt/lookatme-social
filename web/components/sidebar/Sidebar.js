@@ -28,7 +28,7 @@ const Sidebar = () => {
   // };
   return (
     <>
-      <div className="sticky w-full h-[860px] top-[90px] flex flex-col gap-5">
+      <div className="sticky w-full h-screen top-[90px] flex flex-col gap-5">
         <div
           //onScroll={onScroll}
           id="sidebar"

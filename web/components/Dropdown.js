@@ -8,10 +8,10 @@ export default function Dropdown() {
   const router = useRouter();
   const { localUser, logout } = useAuth();
   const username =
-    localUser.name.charAt(0).toUpperCase() +
+    localUser?.name.charAt(0).toUpperCase() +
     "." +
-    localUser.lastName.charAt(0).toUpperCase() +
-    localUser.lastName.slice(1).toLowerCase();
+    localUser?.lastName.charAt(0).toUpperCase() +
+    localUser?.lastName.slice(1).toLowerCase();
 
   const logOut = () => {
     logout();
