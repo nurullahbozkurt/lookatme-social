@@ -3,6 +3,7 @@ import { useState } from "react";
 import useGetUser from "../../hooks/api/useGetUser";
 import Loading from "../Loading";
 import { IoIosArrowForward } from "react-icons/io";
+import Link from "next/link";
 
 const FollowingCard = () => {
   const { user, isLoading } = useGetUser();
@@ -56,21 +57,25 @@ const FollowingCard = () => {
             user.following.map((user, index) => (
               <>
                 <div key={index} className="flex flex-col items-center">
-                  <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
-                    <Image
-                      className="w-full h-full"
-                      alt=""
-                      src={user.user[0].profilePicture}
-                      objectFit="cover"
-                      layout="fill"
-                      width={600}
-                      height={350}
-                    ></Image>
-                  </div>
-                  <p className="text-xs font-bold opacity-90">
-                    {user.user[0].name[0].toUpperCase() +
-                      user.user[0].name.slice(1)}
-                  </p>
+                  <Link href={`profile/${user.user[0].username}`}>
+                    <a className="flex flex-col items-center">
+                      <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                        <Image
+                          className="w-full h-full"
+                          alt=""
+                          src={user.user[0].profilePicture}
+                          objectFit="cover"
+                          layout="fill"
+                          width={600}
+                          height={350}
+                        ></Image>
+                      </div>
+                      <p className="text-xs font-bold opacity-90">
+                        {user.user[0].name[0].toUpperCase() +
+                          user.user[0].name.slice(1)}
+                      </p>
+                    </a>
+                  </Link>
                 </div>
               </>
             ))}
@@ -78,21 +83,25 @@ const FollowingCard = () => {
             user.followers.map((user, index) => (
               <>
                 <div key={index} className="flex flex-col items-center">
-                  <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
-                    <Image
-                      className="w-full h-full"
-                      alt=""
-                      src={user.user[0].profilePicture}
-                      objectFit="cover"
-                      layout="fill"
-                      width={600}
-                      height={350}
-                    ></Image>
-                  </div>
-                  <p className="text-xs font-bold opacity-90">
-                    {user.user[0].name[0].toUpperCase() +
-                      user.user[0].name.slice(1)}
-                  </p>
+                  <Link href={`profile/${user.user[0].username}`}>
+                    <a className="flex flex-col items-center">
+                      <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                        <Image
+                          className="w-full h-full"
+                          alt=""
+                          src={user.user[0].profilePicture}
+                          objectFit="cover"
+                          layout="fill"
+                          width={600}
+                          height={350}
+                        ></Image>
+                      </div>
+                      <p className="text-xs font-bold opacity-90">
+                        {user.user[0].name[0].toUpperCase() +
+                          user.user[0].name.slice(1)}
+                      </p>
+                    </a>
+                  </Link>
                 </div>
               </>
             ))}

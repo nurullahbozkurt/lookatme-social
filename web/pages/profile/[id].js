@@ -1,24 +1,72 @@
 import Image from "next/image";
-import React from "react";
+import { useMemo } from "react";
 import Layout from "../../components/Layout";
 import Loading from "../../components/Loading";
-import useGetUser from "../../hooks/api/useGetUser";
 import withProtectedRoute from "../withProtectedRoute";
 import { RiUserFollowLine } from "react-icons/ri";
 import { GoLocation } from "react-icons/go";
 import { MdOutlineWorkOutline } from "react-icons/md";
 import { BsPencilFill } from "react-icons/bs";
-import MyPosts from "../../components/MyPosts";
 import { RiUserUnfollowLine } from "react-icons/ri";
 import userInfo from "../../data/userInfo";
 import { GiPublicSpeaker } from "react-icons/gi";
+import { useRouter } from "next/router";
+import useGetAllUser from "../../hooks/api/useGetAllUser";
+import { useAuth } from "../../states/auth";
+import Axios from "../../lib/axios";
+import { useMutation } from "react-query";
+import MyPosts from "../../components/MyPosts";
 
 const Profile = () => {
-  const { user, isLoading } = useGetUser();
+  const router = useRouter();
+  const { localUser } = useAuth();
+  const { data, isLoading, refetch } = useGetAllUser();
+
+  const queryId = router.query.id;
+
+  const user = useMemo(() => {
+    return data?.find((user) => user.username === queryId);
+  }, [queryId, data]);
+
+  const me = useMemo(() => {
+    return localUser?.username === user?.username;
+  }, [localUser, user]);
+
+  const followControl = useMemo(() => {
+    return user?.followers.map(
+      (user) => user?.followersId === localUser?._id
+    )[0];
+  }, [user, me]);
+
+  console.log("followControl", followControl);
   console.log("user", user);
 
+  const fetchFollow = useMutation(() => {
+    return Axios.put(`/users/${user._id}/follow`);
+  });
+  const fetchUnFollow = useMutation(() => {
+    return Axios.put(`/users/${user._id}/unfollow`);
+  });
+
+  const handleFollow = async () => {
+    try {
+      await fetchFollow.mutateAsync();
+      refetch();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handleUnFollow = async () => {
+    try {
+      await fetchUnFollow.mutateAsync();
+      refetch();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const { name, lastname, job, country, city } = userInfo(user);
-  console.log("job", job);
+
   if (isLoading)
     return (
       <Layout>
@@ -67,7 +115,7 @@ const Profile = () => {
                   <p className="text-xl font-extrabold text-gray-700">
                     {user.followers.length}
                   </p>
-                  <p className=" text-gray-700/50">Follow</p>
+                  <p className=" text-gray-700/50">Followers</p>
                 </div>
                 <div className="flex flex-col items-center">
                   <p className="text-xl font-extrabold text-gray-700">
@@ -76,16 +124,36 @@ const Profile = () => {
                   <p className=" text-gray-700/50">Following</p>
                 </div>
               </div>
-              <div className="flex items-center gap-7">
-                <button className="flex py-1 px-2 rounded bg-primaryBlue hover:bg-primaryGreen text-white items-center gap-1">
-                  <RiUserFollowLine />
-                  <p>Follow</p>
-                </button>
-                <button className="flex py-1 px-2 rounded bg-red-800 hover:bg-primaryGreen text-white items-center gap-1">
-                  <RiUserUnfollowLine />
-                  <p>Unfollow</p>
-                </button>
-              </div>
+              {!me && (
+                <div className="flex items-center">
+                  {!followControl && (
+                    <button
+                      onClick={handleFollow}
+                      disabled={fetchFollow.isLoading}
+                      className={`${
+                        fetchFollow.isLoading
+                          ? " disabled:bg-primaryBlue/50"
+                          : ""
+                      } flex py-1 px-5 rounded bg-primaryBlue hover:bg-primaryGreen text-white items-center gap-1 mr-10`}
+                    >
+                      <RiUserFollowLine />
+                      <p>Follow</p>
+                    </button>
+                  )}
+                  {followControl && (
+                    <button
+                      onClick={handleUnFollow}
+                      disabled={fetchUnFollow.isLoading}
+                      className={`${
+                        fetchUnFollow.isLoading ? "disabled:bg-red-800/50" : ""
+                      } flex py-1 px-5 rounded bg-red-800 hover:bg-primaryGreen text-white items-center gap-1 mr-10`}
+                    >
+                      <RiUserUnfollowLine />
+                      <p>Unfollow</p>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="flex flex-col items-center justify-center pb-5">
               <div className="text-3xl font-extrabold">
@@ -99,15 +167,21 @@ const Profile = () => {
                     {" "}
                     <GoLocation />
                   </div>
-                  <h1>
-                    {country}, {city}
-                  </h1>
+                  {(country === "" || city === "") && (
+                    <h1>add location information 🚩</h1>
+                  )}
+                  {(country !== "" || city !== "") && (
+                    <h1>
+                      {country}, {city}
+                    </h1>
+                  )}
                 </div>
                 <div className="flex items-center gap-1  opacity-80">
                   <div>
                     <MdOutlineWorkOutline />
                   </div>
-                  <h1>{job}</h1>
+                  {job === "" && <h1>Add job information 👀</h1>}
+                  {job !== "" && <h1>{job}</h1>}
                 </div>
                 <div className="flex items-center gap-1  opacity-80">
                   <div>

@@ -10,6 +10,7 @@ import Loading from "../../components/Loading";
 
 import Axios from "../../lib/axios";
 import useGetUser from "../../hooks/api/useGetUser";
+import Link from "next/link";
 
 const ProfileCard = () => {
   const { user: user, isLoading, timeLineRefetch } = useGetUser();
@@ -129,7 +130,9 @@ const ProfileCard = () => {
           </div>
           <div className="flex flex-col items-center justify-center gap-3">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-bold text-lg">{name + " " + lastname}</h1>
+              <Link href={`/profile/${user.username}`}>
+                <a className="font-bold text-lg">{name + " " + lastname}</a>
+              </Link>
               <h1 className="text-sm font-medium text-gray-500 text-opacity-80">
                 {job}
               </h1>

@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import Loading from "./Loading";
 import userInfo from "../data/userInfo";
 import { AiFillCloseCircle } from "react-icons/ai";
+import Link from "next/link";
 
 const TimeLinePost = () => {
   const { localUser } = useAuth();
@@ -152,9 +153,14 @@ const TimeLinePost = () => {
                     ></Image>
                   </div>
                   <div className="flex flex-col">
-                    <h1 className="text-sm font-semibold">
-                      {name} {lastname}
-                    </h1>
+                    <Link
+                      href={`/profile/${post.user.username}`}
+                      className="text-sm font-semibold"
+                    >
+                      <a className="font-semibold">
+                        {name} {lastname}
+                      </a>
+                    </Link>
                     <div className="flex items-center gap-1 text-xs font-medium text-gray-500 text-opacity-80">
                       <h1 className="">{job}</h1>
                       <p className="flex items-center gap-0.5">
@@ -257,7 +263,7 @@ const TimeLinePost = () => {
                     return like.userId === localUser._id;
                   });
 
-                  console.log("meComment", meComment);
+                  console.log("comment", comment);
                   return (
                     <>
                       <div key={index}>
@@ -280,9 +286,15 @@ const TimeLinePost = () => {
                             </div>
                             <div className="group flex-1 relative flex flex-col gap-1 bg-gray-100 rounded-lg p-3 text-sm">
                               <div className="flex items-center justify-between">
-                                <h1 className="font-bold text-[15px]">
-                                  {name} {lastname}
-                                </h1>
+                                <Link
+                                  href={`/profile/${comment.user[0].username}`}
+                                  className="font-bold text-[15px]"
+                                >
+                                  <a className="font-semibold">
+                                    {" "}
+                                    {name} {lastname}
+                                  </a>
+                                </Link>
                                 {meComment && (
                                   <button
                                     onClick={() =>

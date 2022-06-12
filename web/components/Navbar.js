@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import Dropdown from "./Dropdown";
 
@@ -6,7 +7,9 @@ const Navbar = () => {
     <>
       <div className="w-full flex items-center border-b justify-between h-20 bg-white px-10">
         <div>
-          <h1 className="text-3xl font-poiret text-center">look@me</h1>
+          <Link href={"/"}>
+            <a className="text-3xl font-poiret text-center">look@me</a>
+          </Link>
         </div>
         <div className="flex-1 hidden sm:block px-10 md:px-20">
           <form>
