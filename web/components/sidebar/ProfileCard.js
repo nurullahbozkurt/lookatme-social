@@ -11,8 +11,10 @@ import Loading from "../../components/Loading";
 import Axios from "../../lib/axios";
 import useGetUser from "../../hooks/api/useGetUser";
 import Link from "next/link";
+import { memo } from "react";
 
 const ProfileCard = () => {
+  console.log("ProfileCard Component is rendered");
   const { user: user, isLoading, timeLineRefetch } = useGetUser();
   const { picUrl, name, lastname, job, country, city } = userInfo(
     user,
@@ -166,4 +168,4 @@ const ProfileCard = () => {
   );
 };
 
-export default ProfileCard;
+export default memo(ProfileCard);

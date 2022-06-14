@@ -11,6 +11,7 @@ import Axios from "../../lib/axios";
 import { useAuth } from "../../states/auth";
 import LocalSelect from "./LocalSelect";
 import useGetTimeline from "../../hooks/api/useGetTimeline";
+import { memo } from "react";
 
 const CreatePost = () => {
   const { localUser } = useAuth();
@@ -165,4 +166,4 @@ const CreatePost = () => {
   );
 };
 
-export default CreatePost;
+export default memo(CreatePost);

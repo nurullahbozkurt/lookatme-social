@@ -2,10 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { AiFillLike } from "react-icons/ai";
 import { GoLocation } from "react-icons/go";
-import useMyAllPosts from "../../hooks/api/useGetMyAllPosts";
+import useGetMyAllPosts from "../../hooks/api/useGetMyAllPosts";
 import Loading from "../Loading";
-export default function MyAllPostsCard() {
-  const { myPosts, isLoading } = useMyAllPosts();
+import { useAuth } from "../../states/auth";
+import { useMemo } from "react";
+import { memo } from "react";
+
+const MyAllPostsCard = () => {
+  console.log("MyAllPostsCard rendered");
+  const { localUser } = useAuth();
+  const userId = useMemo(() => {
+    return localUser?._id;
+  }, [localUser?._id]);
+
+  const { myPost, isLoading } = useGetMyAllPosts(userId);
 
   if (isLoading)
     return (
@@ -20,12 +30,12 @@ export default function MyAllPostsCard() {
           <div className="flex items-center gap-1">
             <h1>My Posts</h1>
             <div className="rounded-full flex items-center justify-center bg-primaryGreen text-white p-0.5 w-4 h-4">
-              <p className="text-xs"> {myPosts.length}</p>
+              <p className="text-xs"> {myPost.length}</p>
             </div>
           </div>
         </div>
         <div className="w-full overflow-x-scroll flex gap-5  ">
-          {myPosts.map((post, index) => (
+          {myPost.map((post, index) => (
             <>
               <div
                 key={index}
@@ -65,4 +75,5 @@ export default function MyAllPostsCard() {
       </div>
     </div>
   );
-}
+};
+export default memo(MyAllPostsCard);

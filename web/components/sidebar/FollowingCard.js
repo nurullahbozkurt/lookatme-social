@@ -4,12 +4,12 @@ import useGetUser from "../../hooks/api/useGetUser";
 import Loading from "../Loading";
 import { IoIosArrowForward } from "react-icons/io";
 import Link from "next/link";
+import { memo } from "react";
 
 const FollowingCard = () => {
+  console.log("FollowingCard Component is rendered");
   const { user, isLoading } = useGetUser();
   const [changeFollow, setChangeFollow] = useState(false);
-
-  console.log("user", user);
 
   const handleChangeFollow = () => {
     setChangeFollow(!changeFollow);
@@ -111,4 +111,4 @@ const FollowingCard = () => {
   );
 };
 
-export default FollowingCard;
+export default memo(FollowingCard);

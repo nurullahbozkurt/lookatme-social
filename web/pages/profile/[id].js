@@ -17,6 +17,8 @@ import Axios from "../../lib/axios";
 import { useMutation } from "react-query";
 import MyPosts from "../../components/MyPosts";
 
+import { memo } from "react";
+
 const Profile = () => {
   const router = useRouter();
   const { localUser } = useAuth();
@@ -37,9 +39,6 @@ const Profile = () => {
       (user) => user?.followersId === localUser?._id
     )[0];
   }, [user, me]);
-
-  console.log("followControl", followControl);
-  console.log("user", user);
 
   const fetchFollow = useMutation(() => {
     return Axios.put(`/users/${user._id}/follow`);
@@ -94,13 +93,12 @@ const Profile = () => {
               <div className="relative w-48 h-48 shadow-avatarShadow rounded-full overflow-hidden">
                 <Image
                   className="w-full h-full"
-                  alt=""
                   src={user?.profilePicture}
                   objectFit="cover"
                   layout="fill"
                   width={600}
                   height={350}
-                ></Image>
+                ></Image>{" "}
               </div>
             </div>
             <div className="w-full flex justify-between pt-16 px-16 pb-8">
@@ -199,7 +197,7 @@ const Profile = () => {
               </div>
             </div>
             <div className="w-full flex flex-col gap-5 px-20 py-10">
-              <MyPosts />
+              <MyPosts userId={user?._id} />
             </div>
           </div>
         </div>
@@ -208,4 +206,4 @@ const Profile = () => {
   );
 };
 
-export default withProtectedRoute(Profile);
+export default withProtectedRoute(memo(Profile));

@@ -4,7 +4,6 @@ import { useAuth } from "../../states/auth";
 import Axios from "../../lib/axios";
 
 const useGetTimeline = () => {
-  const [timeLine, setTimeLine] = useState(null);
   const { localUser, userLoaded } = useAuth();
   const userId = localUser._id;
 
@@ -19,11 +18,7 @@ const useGetTimeline = () => {
     return data;
   });
 
-  useEffect(() => {
-    setTimeLine(data);
-  }, [data]);
-
-  return { timeLine, timeLineRefetch, isLoading };
+  return { timeLine: data, timeLineRefetch, isLoading };
 };
 
 export default useGetTimeline;

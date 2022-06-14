@@ -5,7 +5,7 @@ import { GoLocation } from "react-icons/go";
 import useGetTimeline from "../hooks/api/useGetTimeline";
 import { useAuth } from "../states/auth";
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState } from "react";
 import Axios from "../lib/axios";
 import { useMutation } from "react-query";
 import { format } from "date-fns";
@@ -13,27 +13,28 @@ import Loading from "./Loading";
 import userInfo from "../data/userInfo";
 import { AiFillCloseCircle } from "react-icons/ai";
 import Link from "next/link";
+import { memo } from "react";
 
 const TimeLinePost = () => {
   const { localUser } = useAuth();
-  const [postId, setPostId] = useState(null);
-  const [commentLikeId, setCommentLikeID] = useState(null);
-  const [commentDeleteId, setCommentDeleteId] = useState(null);
   const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
   const [comment, setComment] = useState({
     postId: null,
     comment: null,
   });
 
-  console.log("timeLine", timeLine);
+  // fetch functions
 
-  // fetch function
-
-  const fetchLike = useMutation(() => {
-    return Axios.put(`/posts/${postId}/like`);
+  const fetchLike = useMutation((id) => {
+    return Axios.put(`/posts/${id.id}/like`, id);
   });
-  const fetchCommentLike = useMutation(() => {
-    return Axios.post(`/posts/${commentLikeId}/comment-like`);
+
+  const fetchCommentLike = useMutation((id) => {
+    return Axios.post(`/posts/${id.id}/comment-like`, id);
+  });
+
+  const fetchCommentDelete = useMutation((id) => {
+    return Axios.delete(`/posts/${id.id}/comment`, id);
   });
 
   const fetchComment = useMutation(() => {
@@ -41,54 +42,6 @@ const TimeLinePost = () => {
       comment: comment.comment,
     });
   });
-  const fetchCommentDelete = useMutation(() => {
-    return Axios.delete(`/posts/${commentDeleteId}/comment`);
-  });
-
-  const clickLikeButton = (postId) => {
-    setPostId(postId);
-  };
-  const clickCommentLikeButton = (commentId) => {
-    setCommentLikeID(commentId);
-  };
-  const clickDeleteMyCommentButton = (commentId) => {
-    setCommentDeleteId(commentId);
-  };
-
-  // handle function for post
-
-  const handleLike = () => {
-    if (!postId) return;
-    try {
-      fetchLike.mutateAsync();
-      setPostId(null);
-      timeLineRefetch();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleCommentLike = () => {
-    if (!commentLikeId) return;
-    try {
-      fetchCommentLike.mutateAsync();
-      setCommentLikeID(null);
-      timeLineRefetch();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleDeleteMyComment = () => {
-    if (!commentDeleteId) return;
-    try {
-      fetchCommentDelete.mutateAsync();
-      setCommentDeleteId(null);
-      timeLineRefetch();
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const sendComment = (e) => {
     e.preventDefault();
@@ -103,23 +56,6 @@ const TimeLinePost = () => {
       console.log(err);
     }
   };
-
-  // useEffects
-
-  useEffect(() => {
-    if (!postId) return;
-    handleLike();
-  }, [postId]);
-
-  useEffect(() => {
-    if (!commentLikeId) return;
-    handleCommentLike();
-  }, [commentLikeId]);
-
-  useEffect(() => {
-    if (!commentDeleteId) return;
-    handleDeleteMyComment();
-  }, [commentDeleteId]);
 
   if (isLoading) return <Loading />;
   return (
@@ -188,8 +124,8 @@ const TimeLinePost = () => {
                 </div>
                 <div className="flex items-center justify-between border-y py-3 border-opacity-50">
                   <div className="flex items-center -space-x-1.5 max-w-[200px] overflow-scroll ">
-                    {post.likes?.map((user, index) =>
-                      user.likedUser?.map((user) => {
+                    {post.likes?.map((user) =>
+                      user.likedUser?.map((user, index) => {
                         return (
                           <>
                             <div
@@ -213,7 +149,10 @@ const TimeLinePost = () => {
                     {!fetchLike.isLoading && (
                       <>
                         <button
-                          onClick={() => clickLikeButton(post?.id)}
+                          onClick={async () => {
+                            await fetchLike.mutateAsync({ id: post?.id });
+                            timeLineRefetch();
+                          }}
                           className={`${
                             iLikePost ? "text-primaryBlue" : ""
                           } hover:text-primaryBlue/50`}
@@ -230,7 +169,10 @@ const TimeLinePost = () => {
                     {fetchLike.isLoading && !fetchLike.isSuccess && (
                       <>
                         <button
-                          onClick={() => clickLikeButton(post?.id)}
+                          onClick={async () => {
+                            await fetchLike.mutateAsync({ id: post?.id });
+                            timeLineRefetch();
+                          }}
                           disabled={true}
                           className={"text-primaryBlue/50"}
                         >
@@ -263,7 +205,6 @@ const TimeLinePost = () => {
                     return like.userId === localUser._id;
                   });
 
-                  console.log("comment", comment);
                   return (
                     <>
                       <div key={index}>
@@ -297,9 +238,12 @@ const TimeLinePost = () => {
                                 </Link>
                                 {meComment && (
                                   <button
-                                    onClick={() =>
-                                      clickDeleteMyCommentButton(comment.id)
-                                    }
+                                    onClick={async () => {
+                                      await fetchCommentDelete.mutateAsync({
+                                        id: comment.id,
+                                      });
+                                      timeLineRefetch();
+                                    }}
                                     className="hidden group-hover:block text-red-700 text-lg"
                                   >
                                     <AiFillCloseCircle />
@@ -313,9 +257,12 @@ const TimeLinePost = () => {
                                     <p>{comment.commentLikes.length}</p>
                                   </div>
                                   <button
-                                    onClick={() =>
-                                      clickCommentLikeButton(comment.id)
-                                    }
+                                    onClick={async () => {
+                                      await fetchCommentLike.mutateAsync({
+                                        id: comment.id,
+                                      });
+                                      timeLineRefetch();
+                                    }}
                                     className={`${
                                       iLikeComment ? "text-red-700" : ""
                                     } text-xl  hover:text-red-700/50`}
@@ -387,4 +334,4 @@ const TimeLinePost = () => {
   );
 };
 
-export default TimeLinePost;
+export default memo(TimeLinePost);

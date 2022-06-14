@@ -3,6 +3,7 @@ import React from "react";
 import Dropdown from "./Dropdown";
 
 const Navbar = () => {
+  console.log("Navbar Component is rendered");
   return (
     <>
       <div className="w-full flex items-center border-b justify-between h-20 bg-white px-10">
