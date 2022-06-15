@@ -143,7 +143,6 @@ module.exports.getPost = getPost;
 
 //Get User All Posts
 const userAllPosts = async (req, res) => {
-  const user = await User.findById(req.user._id);
   const userPosts = await Post.find({ userId: req.params.id })
     .populate({
       path: "user",
@@ -174,12 +173,7 @@ const userAllPosts = async (req, res) => {
         },
       ],
     });
-  if (!user) {
-    return res.status(404).json("User not found !");
-  }
-  if (req.params.id !== req.user._id) {
-    return res.status(401).json("You are not authorized !");
-  }
+
   try {
     res.status(200).json(userPosts);
   } catch (err) {
