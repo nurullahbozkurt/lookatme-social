@@ -14,7 +14,6 @@ import Link from "next/link";
 import { memo } from "react";
 
 const ProfileCard = () => {
-  console.log("ProfileCard Component is rendered");
   const { user: user, isLoading, timeLineRefetch } = useGetUser();
   const { picUrl, name, lastname, job, country, city } = userInfo(
     user,

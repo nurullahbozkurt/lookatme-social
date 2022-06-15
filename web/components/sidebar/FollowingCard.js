@@ -7,7 +7,6 @@ import Link from "next/link";
 import { memo } from "react";
 
 const FollowingCard = () => {
-  console.log("FollowingCard Component is rendered");
   const { user, isLoading } = useGetUser();
   const [changeFollow, setChangeFollow] = useState(false);
 

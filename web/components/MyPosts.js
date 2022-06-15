@@ -6,7 +6,7 @@ import { useAuth } from "../states/auth";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Axios from "../lib/axios";
-import { useMutation } from "react-query";
+import { useMutation, useQuery } from "react-query";
 import { format } from "date-fns";
 import Loading from "./Loading";
 import userInfo from "../data/userInfo";
@@ -22,8 +22,8 @@ const MyPosts = ({ userId }) => {
     comment: null,
   });
 
-  const { myPost, isLoading, refetch } = useGetMyAllPosts(userId);
-  console.log("myPosts", myPost, userId);
+  const { myPost, isLoading, refetch, isFetching } = useGetMyAllPosts(userId);
+  console.log("isFetching", isFetching);
 
   // fetch function
 

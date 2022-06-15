@@ -2,16 +2,16 @@ import Axios from "../../lib/axios";
 import { useQuery } from "react-query";
 
 const useMyPosts = (userId) => {
-  console.log("userId", userId);
-  const { data, isLoading, refetch } = useQuery(
+  const { data, isLoading, refetch, isFetching } = useQuery(
     ["useGetMyAllPosts", userId],
     async () => {
-      const { data } = await Axios.get(`/posts/${userId}/user-posts`);
+      const { data } = await Axios.get(`/posts/${userId && userId}/user-posts`);
       return data;
     }
   );
+  console.log("useMyPostsIDD", userId);
 
-  return { myPost: data, isLoading, refetch };
+  return { myPost: data, isLoading, refetch, isFetching };
 };
 
 export default useMyPosts;

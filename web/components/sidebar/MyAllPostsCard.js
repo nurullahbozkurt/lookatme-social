@@ -9,7 +9,6 @@ import { useMemo } from "react";
 import { memo } from "react";
 
 const MyAllPostsCard = () => {
-  console.log("MyAllPostsCard rendered");
   const { localUser } = useAuth();
   const userId = useMemo(() => {
     return localUser?._id;
