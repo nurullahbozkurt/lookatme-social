@@ -7,9 +7,11 @@ const useMyPosts = (userId) => {
     async () => {
       const { data } = await Axios.get(`/posts/${userId && userId}/user-posts`);
       return data;
+    },
+    {
+      refetchOnMount: false,
     }
   );
-  console.log("useMyPostsIDD", userId);
 
   return { myPost: data, isLoading, refetch, isFetching };
 };

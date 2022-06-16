@@ -6,7 +6,7 @@ import { useAuth } from "../states/auth";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import Axios from "../lib/axios";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { format } from "date-fns";
 import Loading from "./Loading";
 import userInfo from "../data/userInfo";
@@ -16,6 +16,7 @@ import useGetMyAllPosts from "../hooks/api/useGetMyAllPosts";
 
 const MyPosts = ({ userId }) => {
   const { localUser } = useAuth();
+  const queryClient = useQueryClient();
 
   const [comment, setComment] = useState({
     postId: null,
@@ -23,13 +24,55 @@ const MyPosts = ({ userId }) => {
   });
 
   const { myPost, isLoading, refetch, isFetching } = useGetMyAllPosts(userId);
-  console.log("isFetching", isFetching);
+
+  const getData = queryClient.getQueryData(["useGetMyAllPosts", userId]);
+  console.log("getData", getData);
 
   // fetch function
 
+  const onClickLikeButton = async (post) => {
+    if (post.likes.find((like) => like.userId === localUser._id)) {
+      queryClient.setQueryData(
+        ["useGetMyAllPosts", userId],
+        [
+          ...myPost.map((p) => {
+            if (p._id !== post._id) {
+              return;
+            }
+
+            p.likes = p.likes.filter((like) => like.userId !== localUser._id);
+            return p;
+          }),
+        ]
+      );
+      await fetchLike.mutateAsync(post._id);
+    } else {
+      queryClient.setQueryData(
+        ["useGetMyAllPosts", userId],
+        [
+          ...myPost.map((p) => {
+            if (p._id !== post._id) {
+              return;
+            }
+
+            p.likes.push({
+              userId: localUser._id,
+              postId: post._id,
+              likedUser: [{ ...localUser }],
+            });
+            return p;
+          }),
+        ]
+      );
+      await fetchLike.mutateAsync(post._id);
+    }
+    //await fetchLike.mutateAsync(post._id);
+  };
+
   const fetchLike = useMutation((id) => {
-    return Axios.put(`/posts/${id.id}/like`);
+    return Axios.put(`/posts/${id}/like`);
   });
+
   const fetchCommentLike = useMutation((id) => {
     return Axios.post(`/posts/${id.id}/comment-like`);
   });
@@ -67,7 +110,6 @@ const MyPosts = ({ userId }) => {
           const iLikePost = post?.likes.some(
             (like) => like.userId === localUser._id
           );
-          console.log("iLikePost", iLikePost);
 
           return (
             <>
@@ -143,10 +185,7 @@ const MyPosts = ({ userId }) => {
                       {!fetchLike.isLoading && (
                         <>
                           <button
-                            onClick={async () => {
-                              await fetchLike.mutateAsync({ id: post?.id });
-                              refetch();
-                            }}
+                            onClick={() => onClickLikeButton(post)}
                             className={`${
                               iLikePost ? "text-primaryBlue" : ""
                             } hover:text-primaryBlue/50`}
@@ -163,10 +202,7 @@ const MyPosts = ({ userId }) => {
                       {fetchLike.isLoading && !fetchLike.isSuccess && (
                         <>
                           <button
-                            onClick={async () => {
-                              await fetchLike.mutateAsync({ id: post?.id });
-                              refetch();
-                            }}
+                            onClick={() => onClickLikeButton(post)}
                             disabled={true}
                             className={"text-primaryBlue/50"}
                           >

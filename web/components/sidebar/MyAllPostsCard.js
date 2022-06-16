@@ -34,41 +34,39 @@ const MyAllPostsCard = () => {
           </div>
         </div>
         <div className="w-full overflow-x-scroll flex gap-5  ">
-          {myPost.map((post, index) => (
-            <>
-              <div
-                key={index}
-                className="relative group min-w-[210px] h-[190px] overflow-hidden cursor-pointer rounded group-hover:text-gray-200 shadow-avatarShadow "
-              >
-                <div className="relative w-full h-full overflow-hidden">
-                  <Image
-                    className="w-full h-full"
-                    alt=""
-                    src={post.img}
-                    objectFit="cover"
-                    layout="fill"
-                  ></Image>
-                </div>
-                <div className="absolute top-0 bottom-0 right-0 left-0 bg-gray-900/80 hover:bg-gray-900/70 ">
-                  <Link href={`/#${post._id}`} scroll={false}>
-                    <div className="h-full flex flex-col  justify-between p-3">
-                      <div className="flex items-center gap-2 font-bold text-primaryBlue">
-                        <div className="text-lg">
-                          <GoLocation />
-                        </div>
-                        <h1 className="text-base  ">{post.city}</h1>
-                      </div>
-                      <div className="flex items-end justify-end text-primaryBlue text-2xl">
-                        <AiFillLike />
-                        <span className="text-sm font-bold ">
-                          {post.likes.length}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
+          {myPost?.map((post) => (
+            <div
+              key={post?._id}
+              className="relative group min-w-[210px] h-[190px] overflow-hidden cursor-pointer rounded group-hover:text-gray-200 shadow-avatarShadow "
+            >
+              <div className="relative w-full h-full overflow-hidden">
+                <Image
+                  className="w-full h-full"
+                  alt=""
+                  src={post.img}
+                  objectFit="cover"
+                  layout="fill"
+                ></Image>
               </div>
-            </>
+              <div className="absolute top-0 bottom-0 right-0 left-0 bg-gray-900/80 hover:bg-gray-900/70 ">
+                <Link href={`/#${post._id}`} scroll={false}>
+                  <div className="h-full flex flex-col  justify-between p-3">
+                    <div className="flex items-center gap-2 font-bold text-primaryBlue">
+                      <div className="text-lg">
+                        <GoLocation />
+                      </div>
+                      <h1 className="text-base  ">{post.city}</h1>
+                    </div>
+                    <div className="flex items-end justify-end text-primaryBlue text-2xl">
+                      <AiFillLike />
+                      <span className="text-sm font-bold ">
+                        {post.likes.length}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
       </div>

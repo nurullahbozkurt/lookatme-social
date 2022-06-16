@@ -53,56 +53,53 @@ const FollowingCard = () => {
         </div>
         <div className="w-full flex items-center gap-[10px] overflow-x-scroll">
           {!changeFollow &&
-            user.following.map((user, index) => (
-              <>
-                <div key={index} className="flex flex-col items-center">
-                  <Link href={`profile/${user.user[0].username}`}>
-                    <a className="flex flex-col items-center">
-                      <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
-                        <Image
-                          className="w-full h-full"
-                          alt=""
-                          src={user.user[0].profilePicture}
-                          objectFit="cover"
-                          layout="fill"
-                          width={600}
-                          height={350}
-                        ></Image>
-                      </div>
-                      <p className="text-xs font-bold opacity-90">
-                        {user.user[0].name[0].toUpperCase() +
-                          user.user[0].name.slice(1)}
-                      </p>
-                    </a>
-                  </Link>
-                </div>
-              </>
+            user.following.map((user) => (
+              <div key={user.id} className="flex flex-col items-center">
+                <Link href={`profile/${user.user[0].username}`}>
+                  <a className="flex flex-col items-center">
+                    <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                      <Image
+                        className="w-full h-full"
+                        alt=""
+                        src={user.user[0].profilePicture}
+                        objectFit="cover"
+                        layout="fill"
+                        width={600}
+                        height={350}
+                      ></Image>
+                    </div>
+                    <p className="text-xs font-bold opacity-90">
+                      {user.user[0].name[0].toUpperCase() +
+                        user.user[0].name.slice(1)}
+                    </p>
+                  </a>
+                </Link>
+              </div>
             ))}
           {changeFollow &&
-            user.followers.map((user, index) => (
-              <>
-                <div key={index} className="flex flex-col items-center">
-                  <Link href={`profile/${user.user[0].username}`}>
-                    <a className="flex flex-col items-center">
-                      <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
-                        <Image
-                          className="w-full h-full"
-                          alt=""
-                          src={user.user[0].profilePicture}
-                          objectFit="cover"
-                          layout="fill"
-                          width={600}
-                          height={350}
-                        ></Image>
-                      </div>
-                      <p className="text-xs font-bold opacity-90">
-                        {user.user[0].name[0].toUpperCase() +
-                          user.user[0].name.slice(1)}
-                      </p>
-                    </a>
-                  </Link>
-                </div>
-              </>
+            user.followers.map((user) => (
+              <div key={user.id} className="flex flex-col items-center">
+                <p>{user.id}</p>
+                <Link href={`profile/${user.user[0].username}`}>
+                  <a className="flex flex-col items-center">
+                    <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">
+                      <Image
+                        className="w-full h-full"
+                        alt=""
+                        src={user.user[0].profilePicture}
+                        objectFit="cover"
+                        layout="fill"
+                        width={600}
+                        height={350}
+                      ></Image>
+                    </div>
+                    <p className="text-xs font-bold opacity-90">
+                      {user.user[0].name[0].toUpperCase() +
+                        user.user[0].name.slice(1)}
+                    </p>
+                  </a>
+                </Link>
+              </div>
             ))}
         </div>
       </div>

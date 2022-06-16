@@ -13,10 +13,17 @@ const useGetTimeline = () => {
     data,
     error,
     refetch: timeLineRefetch,
-  } = useQuery("timeline", async () => {
-    const { data } = await Axios.get(`/posts/${userId}/my-timeline`);
-    return data;
-  });
+  } = useQuery(
+    "timeline",
+    async () => {
+      const { data } = await Axios.get(`/posts/${userId}/my-timeline`);
+      return data;
+    },
+
+    {
+      refetchOnMount: false,
+    }
+  );
 
   return { timeLine: data, timeLineRefetch, isLoading };
 };

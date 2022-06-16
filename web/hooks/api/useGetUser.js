@@ -15,10 +15,17 @@ const useGetUser = () => {
     data,
     error,
     refetch: timeLineRefetch,
-  } = useQuery("getUser", async () => {
-    const { data } = await Axios.get(`/users/${userId}`);
-    return data;
-  });
+  } = useQuery(
+    "getUser",
+    async () => {
+      const { data } = await Axios.get(`/users/${userId}`);
+      return data;
+    },
+
+    {
+      refetchOnMount: false,
+    }
+  );
 
   return { user: data, isLoading, timeLineRefetch };
 };

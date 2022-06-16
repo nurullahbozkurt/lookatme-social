@@ -23,7 +23,6 @@ const Login = () => {
     e.preventDefault();
     try {
       const res = await loginRequest.mutateAsync();
-      console.log("res", res);
       login(res.data.user, res.data.accessToken);
       setError(null);
       setValidateError(null);
