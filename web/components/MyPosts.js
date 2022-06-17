@@ -13,6 +13,7 @@ import userInfo from "../data/userInfo";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { memo } from "react";
 import useGetMyAllPosts from "../hooks/api/useGetMyAllPosts";
+import { usePostLike } from "../hooks/api/mutations/usePostLike";
 
 const MyPosts = ({ userId }) => {
   const { localUser } = useAuth();
@@ -25,53 +26,11 @@ const MyPosts = ({ userId }) => {
 
   const { myPost, isLoading, refetch, isFetching } = useGetMyAllPosts(userId);
 
+  const { mutateAsync: likePostMutate, isLoading: likePostIsLoading } =
+    usePostLike(["useGetMyAllPosts", userId]);
+
   const getData = queryClient.getQueryData(["useGetMyAllPosts", userId]);
   console.log("getData", getData);
-
-  // fetch function
-
-  const onClickLikeButton = async (post) => {
-    if (post.likes.find((like) => like.userId === localUser._id)) {
-      queryClient.setQueryData(
-        ["useGetMyAllPosts", userId],
-        [
-          ...myPost.map((p) => {
-            if (p._id !== post._id) {
-              return;
-            }
-
-            p.likes = p.likes.filter((like) => like.userId !== localUser._id);
-            return p;
-          }),
-        ]
-      );
-      await fetchLike.mutateAsync(post._id);
-    } else {
-      queryClient.setQueryData(
-        ["useGetMyAllPosts", userId],
-        [
-          ...myPost.map((p) => {
-            if (p._id !== post._id) {
-              return;
-            }
-
-            p.likes.push({
-              userId: localUser._id,
-              postId: post._id,
-              likedUser: [{ ...localUser }],
-            });
-            return p;
-          }),
-        ]
-      );
-      await fetchLike.mutateAsync(post._id);
-    }
-    //await fetchLike.mutateAsync(post._id);
-  };
-
-  const fetchLike = useMutation((id) => {
-    return Axios.put(`/posts/${id}/like`);
-  });
 
   const fetchCommentLike = useMutation((id) => {
     return Axios.post(`/posts/${id.id}/comment-like`);
@@ -182,10 +141,12 @@ const MyPosts = ({ userId }) => {
                       )}
                     </div>
                     <div className="flex items-end gap-2 text-2xl">
-                      {!fetchLike.isLoading && (
+                      {!likePostIsLoading && (
                         <>
                           <button
-                            onClick={() => onClickLikeButton(post)}
+                            onClick={async () => {
+                              await likePostMutate(post?._id);
+                            }}
                             className={`${
                               iLikePost ? "text-primaryBlue" : ""
                             } hover:text-primaryBlue/50`}
@@ -199,10 +160,12 @@ const MyPosts = ({ userId }) => {
                           </span>
                         </>
                       )}
-                      {fetchLike.isLoading && !fetchLike.isSuccess && (
+                      {likePostIsLoading && (
                         <>
                           <button
-                            onClick={() => onClickLikeButton(post)}
+                            onClick={async () => {
+                              await likePostMutate(post?._id);
+                            }}
                             disabled={true}
                             className={"text-primaryBlue/50"}
                           >
