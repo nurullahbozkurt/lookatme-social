@@ -1,30 +1,29 @@
 import Image from "next/image";
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
+import { useRouter } from "next/router";
+import { GoLocation } from "react-icons/go";
+import { BsPencilFill } from "react-icons/bs";
+import { GiPublicSpeaker } from "react-icons/gi";
+import { RiUserFollowLine } from "react-icons/ri";
+import { RiUserUnfollowLine } from "react-icons/ri";
+import { MdOutlineWorkOutline } from "react-icons/md";
+
+import userInfo from "../../data/userInfo";
+import { useAuth } from "../../states/auth";
 import Layout from "../../components/Layout";
+import MyPosts from "../../components/MyPosts";
 import Loading from "../../components/Loading";
 import withProtectedRoute from "../withProtectedRoute";
-import { RiUserFollowLine } from "react-icons/ri";
-import { GoLocation } from "react-icons/go";
-import { MdOutlineWorkOutline } from "react-icons/md";
-import { BsPencilFill } from "react-icons/bs";
-import { RiUserUnfollowLine } from "react-icons/ri";
-import userInfo from "../../data/userInfo";
-import { GiPublicSpeaker } from "react-icons/gi";
-import { useRouter } from "next/router";
 import useGetAllUser from "../../hooks/api/useGetAllUser";
-import { useAuth } from "../../states/auth";
-import Axios from "../../lib/axios";
-import { useMutation } from "react-query";
-import MyPosts from "../../components/MyPosts";
-
-import { memo } from "react";
+import { useMutateUserFollow } from "../../hooks/api/mutations/useMutateUserFollow";
+import { useMutateUserUnFollow } from "../../hooks/api/mutations/useMutateUserUnFollow";
 
 const Profile = () => {
   const router = useRouter();
-  const { localUser } = useAuth();
-  const { data, isLoading, refetch } = useGetAllUser();
-
   const queryId = router.query.id;
+
+  const { localUser } = useAuth();
+  const { data, isLoading } = useGetAllUser();
 
   const user = useMemo(() => {
     return data?.find((user) => user.username === queryId);
@@ -35,34 +34,17 @@ const Profile = () => {
   }, [localUser, user]);
 
   const followControl = useMemo(() => {
-    return user?.followers.map(
-      (user) => user?.followersId === localUser?._id
-    )[0];
-  }, [user, me]);
+    return user?.followers.find((user) => user?.followersId === localUser?._id);
+  }, [user, me, data]);
 
-  const fetchFollow = useMutation(() => {
-    return Axios.put(`/users/${user._id}/follow`);
-  });
-  const fetchUnFollow = useMutation(() => {
-    return Axios.put(`/users/${user._id}/unfollow`);
-  });
+  // Mutations
+  const { mutateAsync: userFollowMutateAsync, isLoading: userFollowIsLoading } =
+    useMutateUserFollow(["getAllUser"]);
 
-  const handleFollow = async () => {
-    try {
-      await fetchFollow.mutateAsync();
-      refetch();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-  const handleUnFollow = async () => {
-    try {
-      await fetchUnFollow.mutateAsync();
-      refetch();
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  const {
+    mutateAsync: userUnFollowMutateAsync,
+    isLoading: userUnFollowIsLoading,
+  } = useMutateUserUnFollow(["getAllUser"]);
 
   const { name, lastname, job, country, city } = userInfo(user);
 
@@ -126,12 +108,12 @@ const Profile = () => {
                 <div className="flex items-center">
                   {!followControl && (
                     <button
-                      onClick={handleFollow}
-                      disabled={fetchFollow.isLoading}
+                      onClick={async () => {
+                        await userFollowMutateAsync(user._id);
+                      }}
+                      disabled={userFollowIsLoading}
                       className={`${
-                        fetchFollow.isLoading
-                          ? " disabled:bg-primaryBlue/50"
-                          : ""
+                        userFollowIsLoading ? " disabled:bg-primaryBlue/50" : ""
                       } flex py-1 px-5 rounded bg-primaryBlue hover:bg-primaryGreen text-white items-center gap-1 mr-10`}
                     >
                       <RiUserFollowLine />
@@ -140,10 +122,12 @@ const Profile = () => {
                   )}
                   {followControl && (
                     <button
-                      onClick={handleUnFollow}
-                      disabled={fetchUnFollow.isLoading}
+                      onClick={async () => {
+                        await userUnFollowMutateAsync(user._id);
+                      }}
+                      disabled={userUnFollowIsLoading}
                       className={`${
-                        fetchUnFollow.isLoading ? "disabled:bg-red-800/50" : ""
+                        userUnFollowIsLoading ? "disabled:bg-red-800/50" : ""
                       } flex py-1 px-5 rounded bg-red-800 hover:bg-primaryGreen text-white items-center gap-1 mr-10`}
                     >
                       <RiUserUnfollowLine />

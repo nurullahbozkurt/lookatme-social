@@ -1,23 +1,22 @@
-import { AiFillLike } from "react-icons/ai";
-import { FaHeart } from "react-icons/fa";
-import { BiSend } from "react-icons/bi";
-import { GoLocation } from "react-icons/go";
-import { useAuth } from "../states/auth";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import Axios from "../lib/axios";
-import { useMutation, useQueryClient } from "react-query";
-import { format } from "date-fns";
-import Loading from "./Loading";
-import userInfo from "../data/userInfo";
+import { useState, memo } from "react";
+import { BiSend } from "react-icons/bi";
+import { FaHeart } from "react-icons/fa";
+import { useMutation } from "react-query";
+import { AiFillLike } from "react-icons/ai";
+import { GoLocation } from "react-icons/go";
 import { AiFillCloseCircle } from "react-icons/ai";
-import { memo } from "react";
+
+import Axios from "../lib/axios";
+import { format } from "date-fns";
+import { useAuth } from "../states/auth";
+import userInfo from "../data/userInfo";
 import useGetMyAllPosts from "../hooks/api/useGetMyAllPosts";
-import { usePostLike } from "../hooks/api/mutations/usePostLike";
+import { useMutatePostLike } from "../hooks/api/mutations/useMutatePostLike";
+import { useMutateCommentLike } from "../hooks/api/mutations/useMutateCommentLike";
 
 const MyPosts = ({ userId }) => {
   const { localUser } = useAuth();
-  const queryClient = useQueryClient();
 
   const [comment, setComment] = useState({
     postId: null,
@@ -26,15 +25,14 @@ const MyPosts = ({ userId }) => {
 
   const { myPost, isLoading, refetch, isFetching } = useGetMyAllPosts(userId);
 
+  //Mutations
   const { mutateAsync: likePostMutate, isLoading: likePostIsLoading } =
-    usePostLike(["useGetMyAllPosts", userId]);
+    useMutatePostLike(["getMyAllPosts", userId]);
 
-  const getData = queryClient.getQueryData(["useGetMyAllPosts", userId]);
-  console.log("getData", getData);
+  const { mutateAsync: likeCommentMutate, isLoading: likeCommentIsLoading } =
+    useMutateCommentLike(["getMyAllPosts", userId]);
 
-  const fetchCommentLike = useMutation((id) => {
-    return Axios.post(`/posts/${id.id}/comment-like`);
-  });
+  //Fetching
   const fetchCommentDelete = useMutation((id) => {
     return Axios.delete(`/posts/${id.id}/comment`);
   });
@@ -44,6 +42,8 @@ const MyPosts = ({ userId }) => {
       comment: comment.comment,
     });
   });
+
+  console.log("fetchComment", fetchComment.isLoading, fetchComment.isLoading);
 
   const sendComment = async (e) => {
     e.preventDefault();
@@ -246,10 +246,7 @@ const MyPosts = ({ userId }) => {
                                     {
                                       <button
                                         onClick={async () => {
-                                          await fetchCommentLike.mutateAsync({
-                                            id: comment.id,
-                                          });
-                                          refetch();
+                                          await likeCommentMutate(comment._id);
                                         }}
                                       >
                                         <div

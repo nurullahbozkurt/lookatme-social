@@ -3,7 +3,7 @@ import { useQuery } from "react-query";
 
 const useMyPosts = (userId) => {
   const { data, isLoading, refetch, isFetching } = useQuery(
-    ["useGetMyAllPosts", userId],
+    ["getMyAllPosts", userId],
     async () => {
       const { data } = await Axios.get(`/posts/${userId && userId}/user-posts`);
       return data;

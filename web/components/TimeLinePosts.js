@@ -1,38 +1,40 @@
-import { AiFillLike } from "react-icons/ai";
-import { FaHeart } from "react-icons/fa";
-import { BiSend } from "react-icons/bi";
-import { GoLocation } from "react-icons/go";
-import useGetTimeline from "../hooks/api/useGetTimeline";
-import { useAuth } from "../states/auth";
-import Image from "next/image";
-import { useState } from "react";
-import Axios from "../lib/axios";
-import { useMutation } from "react-query";
-import { format } from "date-fns";
-import Loading from "./Loading";
-import userInfo from "../data/userInfo";
-import { AiFillCloseCircle } from "react-icons/ai";
 import Link from "next/link";
-import { memo } from "react";
+import Image from "next/image";
+import { format } from "date-fns";
+import { useState, memo } from "react";
+import { BiSend } from "react-icons/bi";
+import { FaHeart } from "react-icons/fa";
+import { useMutation } from "react-query";
+import { AiFillLike } from "react-icons/ai";
+import { GoLocation } from "react-icons/go";
+import { AiFillCloseCircle } from "react-icons/ai";
 
-const TimeLinePost = () => {
+import Loading from "./Loading";
+import Axios from "../lib/axios";
+import userInfo from "../data/userInfo";
+import { useAuth } from "../states/auth";
+import useGetTimeline from "../hooks/api/useGetTimeline";
+import { useMutatePostLike } from "../hooks/api/mutations/useMutatePostLike";
+import { useMutateCommentLike } from "../hooks/api/mutations/useMutateCommentLike";
+
+const TimeLinePosts = () => {
   const { localUser } = useAuth();
+
   const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
+
   const [comment, setComment] = useState({
     postId: null,
     comment: null,
   });
 
+  //Mutations
+  const { mutateAsync: likeCommentMutate, isLoading: likeCommentIsLoading } =
+    useMutateCommentLike(["timeline"]);
+
+  const { mutateAsync: likePostMutate, isLoading: likePostIsLoading } =
+    useMutatePostLike(["timeline"]);
+
   // fetch functions
-
-  const fetchLike = useMutation((id) => {
-    return Axios.put(`/posts/${id.id}/like`, id);
-  });
-
-  const fetchCommentLike = useMutation((id) => {
-    return Axios.post(`/posts/${id.id}/comment-like`, id);
-  });
-
   const fetchCommentDelete = useMutation((id) => {
     return Axios.delete(`/posts/${id.id}/comment`, id);
   });
@@ -141,12 +143,11 @@ const TimeLinePost = () => {
                   )}
                 </div>
                 <div className="flex items-end gap-2 text-2xl">
-                  {!fetchLike.isLoading && (
+                  {!likePostIsLoading && (
                     <>
                       <button
                         onClick={async () => {
-                          await fetchLike.mutateAsync({ id: post?.id });
-                          timeLineRefetch();
+                          await likePostMutate(post?.id);
                         }}
                         className={`${
                           iLikePost ? "text-primaryBlue" : ""
@@ -161,12 +162,11 @@ const TimeLinePost = () => {
                       </span>
                     </>
                   )}
-                  {fetchLike.isLoading && !fetchLike.isSuccess && (
+                  {likePostIsLoading && (
                     <>
                       <button
                         onClick={async () => {
-                          await fetchLike.mutateAsync({ id: post?.id });
-                          timeLineRefetch();
+                          await likePostMutate(post?.id);
                         }}
                         disabled={true}
                         className={"text-primaryBlue/50"}
@@ -251,10 +251,7 @@ const TimeLinePost = () => {
                               </div>
                               <button
                                 onClick={async () => {
-                                  await fetchCommentLike.mutateAsync({
-                                    id: comment.id,
-                                  });
-                                  timeLineRefetch();
+                                  await likeCommentMutate(comment.id);
                                 }}
                                 className={`${
                                   iLikeComment ? "text-red-700" : ""
@@ -325,4 +322,4 @@ const TimeLinePost = () => {
   );
 };
 
-export default memo(TimeLinePost);
+export default memo(TimeLinePosts);

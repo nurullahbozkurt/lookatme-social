@@ -6,14 +6,17 @@ const fetchLike = (id) => {
   return Axios.put(`/posts/${id}/like`);
 };
 
-export const usePostLike = (key) => {
+export const useMutatePostLike = (key) => {
   const { localUser } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation(fetchLike, {
-    onSuccess: (data) => {
+    onMutate: async (data) => {
+      await queryClient.cancelQueries(key);
+      const previousData = await queryClient.getQueryData(key);
+
       queryClient.setQueryData(key, (oldData) => {
-        if (oldData.map((post) => post._id === data?.data.postId)) {
+        if (oldData.map((post) => post._id === data)) {
           return oldData.map((post) => {
             if (post.likes.find((like) => like.userId === localUser._id)) {
               post.likes = post.likes.filter(
@@ -30,6 +33,13 @@ export const usePostLike = (key) => {
           });
         }
       });
+      return { previousData };
+    },
+    onError: (err, data, context) => {
+      queryClient.setQueryData(key, context.previousData);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries(key);
     },
   });
 };
