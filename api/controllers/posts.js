@@ -184,6 +184,7 @@ module.exports.userAllPosts = userAllPosts;
 
 //Like and Dislike Post
 const likePost = async (req, res) => {
+  //throw new Error("Method not implemented");
   const post = await Post.findById(req.params.id);
   const Like = await Likes.find({ postId: post.id });
 
@@ -198,7 +199,7 @@ const likePost = async (req, res) => {
       });
       await newLikes.save();
 
-      res.status(200).json("Post liked !");
+      res.status(200).json({ postId: post.id, case: "Post Liked" }); //Post Liked
       // const whoLikedThePost = await User.findById(req.user._id);
       // await post.updateOne({
       //   $push: {
@@ -214,7 +215,7 @@ const likePost = async (req, res) => {
         userId: req.user._id,
         postId: req.params.id,
       });
-      res.status(200).json("Post disliked !");
+      res.status(200).json({ postId: post.id, case: "Post Disliked" }); //Post Disliked
     } catch (err) {
       res.status(500).json(err);
     }
@@ -243,6 +244,7 @@ module.exports.commentPost = commentPost;
 
 // Delete Comment
 const deleteComment = async (req, res) => {
+  //throw new Error("Method not implemented");
   const comment = await Comments.findById(req.params.id);
   if (!comment) {
     return res.status(404).json("Comment not found !");
@@ -271,11 +273,14 @@ module.exports.deleteComment = deleteComment;
 // Like to Post's Comment
 const likeComment = async (req, res) => {
   const comment = await Comments.findById(req.params.id);
-  const Like = await CommentLikes.find({ commentId: comment._id });
-  console.log("Like", Like);
+  const like = await CommentLikes.find({
+    userId: req.user._id,
+    commentId: req.params.id,
+  });
+  console.log("Like", like);
   console.log("comment", comment);
 
-  if (Like.length === 0) {
+  if (like.length === 0) {
     try {
       const newLikes = new CommentLikes({
         userId: req.user._id,
@@ -288,7 +293,7 @@ const likeComment = async (req, res) => {
       res.status(500).json(err);
     }
   }
-  if (Like.length !== 0) {
+  if (like.length !== 0) {
     try {
       await CommentLikes.findOneAndDelete({
         userId: req.user._id,
