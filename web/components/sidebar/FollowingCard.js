@@ -79,7 +79,6 @@ const FollowingCard = () => {
           {changeFollow &&
             user.followers.map((user) => (
               <div key={user.id} className="flex flex-col items-center">
-                <p>{user.id}</p>
                 <Link href={`profile/${user.user[0].username}`}>
                   <a className="flex flex-col items-center">
                     <div className="relative w-16 h-16 border shadow-avatarShadow rounded-full overflow-hidden">

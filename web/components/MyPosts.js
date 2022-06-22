@@ -23,27 +23,36 @@ const MyPosts = ({ userId }) => {
     comment: null,
   });
 
-  const { myPost, isLoading, refetch, isFetching } = useGetMyAllPosts(userId);
+  const { myPost, isLoading, refetch } = useGetMyAllPosts(userId);
 
-  //Mutations
+  //Post Like
   const { mutateAsync: likePostMutate, isLoading: likePostIsLoading } =
     useMutatePostLike(["getMyAllPosts", userId]);
 
+  //Comment Like
   const { mutateAsync: likeCommentMutate, isLoading: likeCommentIsLoading } =
     useMutateCommentLike(["getMyAllPosts", userId]);
 
-  //Fetching
+  //Delete Comment
+  const [delComment, setDelComment] = useState();
   const fetchCommentDelete = useMutation((id) => {
     return Axios.delete(`/posts/${id.id}/comment`);
   });
 
+  const selectCommentDelete = (id) => {
+    setDelComment(
+      myPost?.map((post) => {
+        return post.comments.find((comment) => comment._id === id);
+      })
+    );
+  };
+
+  //Create Comment
   const fetchComment = useMutation(() => {
     return Axios.post(`/posts/${comment.postId}/comment`, {
       comment: comment.comment,
     });
   });
-
-  console.log("fetchComment", fetchComment.isLoading, fetchComment.isLoading);
 
   const sendComment = async (e) => {
     e.preventDefault();
@@ -226,9 +235,11 @@ const MyPosts = ({ userId }) => {
                                   {meComment && (
                                     <button
                                       onClick={async () => {
+                                        selectCommentDelete(comment._id);
                                         await fetchCommentDelete.mutateAsync({
                                           id: comment._id,
                                         });
+
                                         refetch();
                                       }}
                                       className="hidden group-hover:block text-red-700 text-lg"
@@ -238,7 +249,19 @@ const MyPosts = ({ userId }) => {
                                   )}
                                 </div>
                                 <p>{comment.comment}</p>
-                                <div className="absolute -bottom-2 -right-2">
+                                <div className="absolute flex items-center gap-5 -bottom-2 -right-2">
+                                  {meComment &&
+                                    fetchCommentDelete.isError &&
+                                    comment._id === delComment[0]._id && (
+                                      <div className="border px-2 py-1 bg-white rounded-full text-red-700 text-xs">
+                                        <p>Silinirken hata oluştu</p>
+                                      </div>
+                                    )}
+                                  {meComment && fetchCommentDelete.isLoading && (
+                                    <div className="border px-2 py-1 bg-white rounded-full text-red-900 text-xs">
+                                      <p>Comment is deleting..</p>
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-2 rounded-full border py-0.5 px-2 bg-white">
                                     <div className="text-xs text-textColor/70 font-bold">
                                       <p>{comment.commentLikes.length}</p>

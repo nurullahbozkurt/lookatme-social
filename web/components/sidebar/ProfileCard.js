@@ -7,6 +7,7 @@ import { IoHeartDislikeSharp } from "react-icons/io5";
 import userInfo from "../../data/userInfo";
 import { useRouter } from "next/router";
 import Loading from "../../components/Loading";
+import { MdAddAPhoto } from "react-icons/md";
 
 import Axios from "../../lib/axios";
 import useGetUser from "../../hooks/api/useGetUser";
@@ -22,7 +23,7 @@ const ProfileCard = () => {
 
   const [avatar, setAvatar] = useState();
   const [file, setFile] = useState();
-
+  console.log("avatar", avatar);
   const hiddenFileInput = React.useRef();
 
   const handleClick = () => {
@@ -49,6 +50,7 @@ const ProfileCard = () => {
     try {
       await uploadRequest.mutateAsync();
       timeLineRefetch();
+      setAvatar();
     } catch (err) {
       console.log(err);
     }
@@ -65,31 +67,49 @@ const ProfileCard = () => {
           <div className="relative shadow-avatarShadow flex items-center justify-center border rounded-full p-1">
             {picUrl !== process.env.NEXT_PUBLIC_API_URL && (
               <>
-                <div className="relative w-32 h-32 rounded-full overflow-hidden">
-                  <Image
-                    className="w-full h-full"
-                    alt=""
-                    src={user?.profilePicture}
-                    objectFit="cover"
-                    layout="fill"
-                    width={600}
-                    height={350}
-                  ></Image>
-                </div>
-
-                {/* <img
-                  className="w-32 h-32 rounded-full "
-                  src="http://localhost:8800/uploads/1654087729149-computer.jpg"
-                  alt="Rounded avatar"
-                  crossOrigin="anonymous"
-                /> */}
-                <div className="absolute top-0 -right-2">
-                  <div className="text-red-700/60 text-2xl">
-                    <IoHeartDislikeSharp />
+                {!avatar && (
+                  <button onClick={handleClick} className="group ">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden">
+                      <Image
+                        className="w-full h-full"
+                        alt=""
+                        src={user?.profilePicture}
+                        objectFit="cover"
+                        layout="fill"
+                        width={600}
+                        height={350}
+                      ></Image>
+                    </div>
+                    <input
+                      onChange={handleAvatar}
+                      ref={hiddenFileInput}
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      type="file"
+                    />
+                    <div className="absolute bottom-0 right-2 text-2xl hidden group-hover:block">
+                      <MdAddAPhoto />
+                    </div>
+                  </button>
+                )}
+                {avatar && (
+                  <div className="relative">
+                    <img
+                      className="w-32 h-32 rounded-full opacity-20 "
+                      src={avatar}
+                    ></img>
+                    <div className="top-[55px] left-4 absolute">
+                      <button
+                        onClick={uploadAvatar}
+                        className="text-sm border rounded bg-primaryBlue text-white px-1"
+                      >
+                        Upload Avatar
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
-            )}{" "}
+            )}
             {picUrl === process.env.NEXT_PUBLIC_API_URL && (
               <>
                 {!avatar && (
@@ -109,22 +129,20 @@ const ProfileCard = () => {
                   </button>
                 )}
                 {avatar && (
-                  <>
-                    <div className="relative">
-                      <img
-                        className="w-32 h-32 rounded-full opacity-20 "
-                        src={avatar}
-                      ></img>
-                      <div className="top-[55px] left-4 absolute">
-                        <button
-                          onClick={uploadAvatar}
-                          className="text-sm border rounded bg-primaryBlue text-white px-1"
-                        >
-                          Upload Avatar
-                        </button>
-                      </div>
+                  <div className="relative">
+                    <img
+                      className="w-32 h-32 rounded-full opacity-20 "
+                      src={avatar}
+                    ></img>
+                    <div className="top-[55px] left-4 absolute">
+                      <button
+                        onClick={uploadAvatar}
+                        className="text-sm border rounded bg-primaryBlue text-white px-1"
+                      >
+                        Upload Avatar
+                      </button>
                     </div>
-                  </>
+                  </div>
                 )}
               </>
             )}

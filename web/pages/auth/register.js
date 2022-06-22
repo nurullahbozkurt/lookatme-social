@@ -1,14 +1,13 @@
-import React, { useMemo } from "react";
 import { useState } from "react";
-import { useRouter } from "next/router";
 import Axios from "../../lib/axios";
+import React, { useMemo } from "react";
+import { useRouter } from "next/router";
 import { useMutation } from "react-query";
-import { Country, State, City } from "country-state-city";
-import { BiSort } from "react-icons/bi";
+import CountrySelect from "../../components/CountrySelect";
+import CitySelect from "../../components/CitySelect";
+
 const Register = () => {
   const router = useRouter();
-  const countries = Country.getAllCountries();
-  const cities = State.getAllStates();
 
   const [form, setForm] = useState({
     username: "",
@@ -19,16 +18,6 @@ const Register = () => {
     email: "",
     password: "",
   });
-
-  const selectCountry = useMemo(() => {
-    return countries.find((item) => item.name === form.country);
-  }, [form.country]);
-
-  const selectCity = useMemo(() => {
-    return cities
-      .filter((item) => item.countryCode === selectCountry?.isoCode)
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [selectCountry]);
 
   const [passportAlert, setPassportAlert] = useState(false);
   const [againPassword, setAgainPassword] = useState("");
@@ -165,55 +154,20 @@ const Register = () => {
                         What is your job?
                       </label>
                     </div>
-
-                    <div>
-                      <label htmlFor="countrySelect" className="sr-only">
-                        Country Select
-                      </label>
-                      <select
+                    <div className="w-full flex flex-col gap-2 ">
+                      <CountrySelect
+                        form={form}
                         onChange={(e) =>
                           setForm({ ...form, country: e.target.value })
                         }
-                        id="countrySelect"
-                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
-                      >
-                        <option defaultValue={"Choose a country"}>
-                          Choose a country
-                        </option>
-                        {countries.map((country, index) => (
-                          <>
-                            <option key={index} value={country.name}>
-                              {country.name} {country.flag}
-                            </option>
-                          </>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label htmlFor="citySelect" className="sr-only">
-                        City Select
-                      </label>
-                      <select
+                      />
+                      <CitySelect
+                        form={form}
                         onChange={(e) =>
                           setForm({ ...form, city: e.target.value })
                         }
-                        id="citySelect"
-                        className="peer text-sm placeholder-transparent h-10 w-full border-b-[1px] border-gray-300 text-gray-900 focus:outline-none focus:borer-rose-600"
-                      >
-                        <option defaultValue={"Choose a country"}>
-                          Choose a country
-                        </option>
-                        {selectCity?.map((city, index) => (
-                          <>
-                            <option key={index} value={city.name}>
-                              {city.name}
-                            </option>
-                          </>
-                        ))}
-                      </select>
+                      />
                     </div>
-
                     <div className="relative">
                       <input
                         onChange={(e) =>

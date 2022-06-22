@@ -1,20 +1,25 @@
 import Image from "next/image";
-import { useMemo, memo } from "react";
 import { useRouter } from "next/router";
+import { useMutation } from "react-query";
 import { GoLocation } from "react-icons/go";
 import { BsPencilFill } from "react-icons/bs";
-import { GiPublicSpeaker } from "react-icons/gi";
+import { useMemo, memo, useState } from "react";
+import { IoIosAddCircle } from "react-icons/io";
 import { RiUserFollowLine } from "react-icons/ri";
 import { RiUserUnfollowLine } from "react-icons/ri";
+import TextareaCounter from "react-textarea-counter";
 import { MdOutlineWorkOutline } from "react-icons/md";
 
+import Axios from "../../lib/axios";
 import userInfo from "../../data/userInfo";
 import { useAuth } from "../../states/auth";
 import Layout from "../../components/Layout";
 import MyPosts from "../../components/MyPosts";
 import Loading from "../../components/Loading";
+import CitySelect from "../../components/CitySelect";
 import withProtectedRoute from "../withProtectedRoute";
 import useGetAllUser from "../../hooks/api/useGetAllUser";
+import CountrySelect from "../../components/CountrySelect";
 import { useMutateUserFollow } from "../../hooks/api/mutations/useMutateUserFollow";
 import { useMutateUserUnFollow } from "../../hooks/api/mutations/useMutateUserUnFollow";
 
@@ -23,30 +28,46 @@ const Profile = () => {
   const queryId = router.query.id;
 
   const { localUser } = useAuth();
-  const { data, isLoading } = useGetAllUser();
+  const { data, isLoading, refetch } = useGetAllUser();
+
+  // States
+  const [updateUser, setUpdateUser] = useState({
+    country: user?.country,
+    city: user?.city,
+    job: user?.job,
+  });
+  const [hiddenLocationSelect, setHiddenLocationSelect] = useState(false);
+  const [hiddenJobInput, setHiddenJobInput] = useState(false);
+  const [hiddenDescInput, setHiddenDescInput] = useState(false);
 
   const user = useMemo(() => {
     return data?.find((user) => user.username === queryId);
   }, [queryId, data]);
 
+  const { name, lastname, job, country, city, desc } = userInfo(user);
+
   const me = useMemo(() => {
-    return localUser?.username === user?.username;
+    return localUser?._id === user?._id;
   }, [localUser, user]);
 
   const followControl = useMemo(() => {
     return user?.followers.find((user) => user?.followersId === localUser?._id);
   }, [user, me, data]);
 
-  // Mutations
+  // User Follow
   const { mutateAsync: userFollowMutateAsync, isLoading: userFollowIsLoading } =
     useMutateUserFollow(["getAllUser"]);
 
+  //User Unfollow
   const {
     mutateAsync: userUnFollowMutateAsync,
     isLoading: userUnFollowIsLoading,
   } = useMutateUserUnFollow(["getAllUser"]);
 
-  const { name, lastname, job, country, city } = userInfo(user);
+  //Update User Location | Desc
+  const fetchUpdateUserLocation = useMutation(() => {
+    return Axios.put(`/users/${user?._id}`, updateUser);
+  });
 
   if (isLoading)
     return (
@@ -60,7 +81,7 @@ const Profile = () => {
         <div className="absolute left-0 -z-10  flex w-full h-[500px] rounded overflow-hidden ">
           <div className="relative w-full h-full">
             <Image
-              src="/mustang.jpg"
+              src="/test.jpeg"
               objectFit="cover"
               layout="fill"
               priority={true}
@@ -72,7 +93,7 @@ const Profile = () => {
         <div className="w-full flex items-center justify-center pt-[250px]">
           <div className="relative w-[90%] min-h-[300px] flex flex-col items-center bg-white border shadow rounded ">
             <div className="absolute flex items-center justify-center -top-[96px]">
-              <div className="relative w-48 h-48 shadow-avatarShadow rounded-full overflow-hidden">
+              <div className="relative w-48 h-48 p-1 shadow-avatarShadow rounded-full overflow-hidden">
                 <Image
                   className="w-full h-full"
                   src={user?.profilePicture}
@@ -145,37 +166,153 @@ const Profile = () => {
               </div>
               <div className="flex flex-col gap-2 items-center pt-7">
                 <div className="flex items-center gap-1 text-lg font-extrabold uppercase opacity-80">
-                  <div>
-                    {" "}
-                    <GoLocation />
-                  </div>
-                  {(country === "" || city === "") && (
-                    <h1>add location information 🚩</h1>
+                  {(!country || !city) && me && (
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() =>
+                          setHiddenLocationSelect(!hiddenLocationSelect)
+                        }
+                      >
+                        <div className="flex gap-1 items-center hover:text-black">
+                          <GoLocation />
+                          <p>Add location information 🚩</p>
+                        </div>
+                      </button>
+                      <div
+                        className={`${
+                          hiddenLocationSelect ? "block" : "hidden"
+                        } flex flex-col gap-2 border rounded p-2 my-2`}
+                      >
+                        <CountrySelect
+                          form={updateUserLocation}
+                          onChange={(e) =>
+                            setUpdateUser({
+                              ...updateUser,
+                              country: e.target.value,
+                            })
+                          }
+                        />
+                        <CitySelect
+                          form={updateUserLocation}
+                          onChange={(e) =>
+                            setUpdateUser({
+                              ...updateUser,
+                              city: e.target.value,
+                            })
+                          }
+                        />
+                        <button
+                          onClick={async () => {
+                            await fetchUpdateUserLocation.mutateAsync();
+                            refetch();
+                          }}
+                          className="flex items-center justify-center border hover:border-primaryGreen p-0.5 rounded-full hover:text-primaryGreen text-primaryBlue border-primaryBlue"
+                        >
+                          <IoIosAddCircle />
+                        </button>
+                      </div>
+                    </div>
                   )}
-                  {(country !== "" || city !== "") && (
+                  {(country || city) && (
                     <h1>
                       {country}, {city}
                     </h1>
                   )}
                 </div>
+
                 <div className="flex items-center gap-1  opacity-80">
-                  <div>
-                    <MdOutlineWorkOutline />
-                  </div>
-                  {job === "" && <h1>Add job information 👀</h1>}
-                  {job !== "" && <h1>{job}</h1>}
+                  {!job && me && (
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => setHiddenJobInput(!hiddenJobInput)}
+                      >
+                        <div className="flex items-center gap-1 hover:text-black">
+                          <MdOutlineWorkOutline />
+                          Add job information 👀
+                        </div>
+                      </button>
+                      <div
+                        className={`${
+                          hiddenJobInput ? "block" : "hidden"
+                        } w-full rounded flex justify-between items-center`}
+                      >
+                        <input
+                          onChange={(e) =>
+                            setUpdateUser({
+                              ...updateUser,
+                              job: e.target.value,
+                            })
+                          }
+                          className="border-b rounded"
+                        />
+                        <button
+                          onClick={async () => {
+                            await fetchUpdateUserLocation.mutateAsync();
+                            refetch();
+                          }}
+                          className="flex items-center justify-center border hover:border-primaryGreen p-0.5 rounded-full hover:text-primaryGreen text-primaryBlue border-primaryBlue"
+                        >
+                          <IoIosAddCircle />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  {job && (
+                    <h1 className="flex items-center gap-1 ">
+                      <MdOutlineWorkOutline />
+                      {job}
+                    </h1>
+                  )}
                 </div>
+
                 <div className="flex items-center gap-1  opacity-80">
-                  <div>
-                    <BsPencilFill />
-                  </div>
                   <div className="relative flex group items-center cursor-default gap-2">
-                    {`${
-                      user.desc ? user.desc : "Describe yourself in 50 words 🙄"
-                    }`}
-                    <button className="absolute hidden -right-7 group-hover:block text-3xl text-red-800 hover:text-primaryGreen">
-                      <GiPublicSpeaker />
-                    </button>
+                    {!desc && me && (
+                      <div>
+                        <button
+                          onClick={() => setHiddenDescInput(!hiddenDescInput)}
+                        >
+                          <div className="flex items-center gap-1 hover:text-black">
+                            <BsPencilFill />
+                            Describe yourself in 50 words 🙄
+                          </div>
+                        </button>
+                        <div
+                          className={`${
+                            hiddenDescInput ? "block" : "hidden"
+                          } w-full rounded flex items-center justify-center gap-2`}
+                        >
+                          <TextareaCounter
+                            className="text-sm border-b"
+                            countLimit="50"
+                            placeholder=""
+                            maxLength="50"
+                            rows="2"
+                            onChange={(e) =>
+                              setUpdateUser({
+                                ...updateUser,
+                                desc: e.target.value,
+                              })
+                            }
+                          />
+                          <button
+                            onClick={async () => {
+                              await fetchUpdateUserLocation.mutateAsync();
+                              refetch();
+                            }}
+                            className="flex items-center justify-center border hover:border-primaryGreen p-0.5 rounded-full hover:text-primaryGreen text-primaryBlue border-primaryBlue"
+                          >
+                            <IoIosAddCircle />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {desc && (
+                      <h1 className="flex items-center gap-1 ">
+                        <BsPencilFill />
+                        {desc}
+                      </h1>
+                    )}
                   </div>
                 </div>
               </div>
