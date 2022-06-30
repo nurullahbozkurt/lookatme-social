@@ -1,29 +1,28 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { useMutation } from "react-query";
-import { GoLocation } from "react-icons/go";
-import { AiOutlineUserAdd } from "react-icons/ai";
-import { IoHeartDislikeSharp } from "react-icons/io5";
 import userInfo from "../../data/userInfo";
-import { useRouter } from "next/router";
-import Loading from "../../components/Loading";
+import { GoLocation } from "react-icons/go";
 import { MdAddAPhoto } from "react-icons/md";
+import Loading from "../../components/Loading";
+import { AiOutlineUserAdd } from "react-icons/ai";
 
-import Axios from "../../lib/axios";
-import useGetUser from "../../hooks/api/useGetUser";
 import Link from "next/link";
 import { memo } from "react";
+import Axios from "../../lib/axios";
+import useGetUser from "../../hooks/api/useGetUser";
 
 const ProfileCard = () => {
-  const { user: user, isLoading, timeLineRefetch } = useGetUser();
+  const { user, isLoading, timeLineRefetch } = useGetUser();
   const { picUrl, name, lastname, job, country, city } = userInfo(
     user,
     isLoading
   );
+  const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
+  console.log("profilePic", profilePic);
 
   const [avatar, setAvatar] = useState();
   const [file, setFile] = useState();
-  console.log("avatar", avatar);
   const hiddenFileInput = React.useRef();
 
   const handleClick = () => {
@@ -65,7 +64,7 @@ const ProfileCard = () => {
       <div className="w-full border bg-white py-10 flex items-center justify-center shadow-md rounded">
         <div className="flex flex-col items-center gap-3">
           <div className="relative shadow-avatarShadow flex items-center justify-center border rounded-full p-1">
-            {picUrl !== process.env.NEXT_PUBLIC_API_URL && (
+            {profilePic && (
               <>
                 {!avatar && (
                   <button onClick={handleClick} className="group ">
@@ -110,7 +109,7 @@ const ProfileCard = () => {
                 )}
               </>
             )}
-            {picUrl === process.env.NEXT_PUBLIC_API_URL && (
+            {!profilePic && (
               <>
                 {!avatar && (
                   <button

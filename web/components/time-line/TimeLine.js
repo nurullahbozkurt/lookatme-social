@@ -1,5 +1,5 @@
 import CreatePost from "./CreatePost";
-import TimeLinePosts from "../TimeLinePosts";
+import TimeLinePosts from "./TimeLinePosts";
 
 const TimeLine = () => {
   return (

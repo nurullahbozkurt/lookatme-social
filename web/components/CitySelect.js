@@ -28,11 +28,9 @@ const CitySelect = ({ onChange, form }) => {
         >
           <option defaultValue={"Choose a country"}>Choose a country</option>
           {selectCity?.map((city, index) => (
-            <>
-              <option key={index} value={city.name}>
-                {city.name}
-              </option>
-            </>
+            <option key={index} value={city.name}>
+              {city.name}
+            </option>
           ))}
         </select>
       </div>

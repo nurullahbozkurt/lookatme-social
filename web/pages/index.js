@@ -1,6 +1,6 @@
 import Layout from "../components/Layout";
 import Sidebar from "../components/sidebar/Sidebar";
-import AllUsers from "../components/time-line/AllUsers";
+import AllUsers from "../components/AllUsers";
 import TimeLine from "../components/time-line/TimeLine";
 
 import withProtectedRoute from "./withProtectedRoute";
@@ -10,7 +10,7 @@ const Home = () => {
       <div>
         <AllUsers />
       </div>
-      <div className="grid lg:grid-cols-3 xl:grid-cols-5 lg:space-x-5 py-10">
+      <div className="grid lg:grid-cols-3 xl:grid-cols-5 lg:space-x-5 py-5">
         <div className="hidden lg:block lg:col-span-1 xl:col-span-2">
           <Sidebar />
         </div>

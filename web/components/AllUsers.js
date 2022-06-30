@@ -1,19 +1,35 @@
-import Image from "next/image";
 import Link from "next/link";
-import React, { useMemo } from "react";
-import useGetAllUser from "../../hooks/api/useGetAllUser";
-import { useAuth } from "../../states/auth";
+import Image from "next/image";
+import React, { useEffect, useMemo } from "react";
+
+import Loading from "./Loading";
 import { TiTick } from "react-icons/ti";
-import Loading from "../Loading";
+import { useAuth } from "../states/auth";
+import { useAppContext } from "../states/app";
+import useGetAllUser from "../hooks/api/useGetAllUser";
+import useGetTimeline from "../hooks/api/useGetTimeline";
 
 const AllUsers = () => {
   const { localUser } = useAuth();
   const { data, isLoading, refetch } = useGetAllUser();
+  const { timeLineRefetch } = useGetTimeline();
+  const { usersIFollow, setUsersIFollow } = useAppContext();
 
   // All users except me
   const otherAllUsers = useMemo(() => {
     return data?.filter((user) => user._id !== localUser?._id);
   }, [data]);
+
+  const iFollowUsers = useMemo(() => {
+    return otherAllUsers?.filter((user) => {
+      return user.followers.find((f) => f.followersId === localUser._id);
+    });
+  }, [otherAllUsers, localUser]);
+  setUsersIFollow(iFollowUsers?.length);
+
+  useEffect(() => {
+    timeLineRefetch();
+  }, [otherAllUsers]);
 
   if (isLoading) {
     return <Loading />;
@@ -22,18 +38,17 @@ const AllUsers = () => {
     return;
   }
   return (
-    <div className="w-full border bg-white p-3 shadow-md rounded mt-10 ">
-      <div className="">
-        <span className="border-b border-textColor">
+    <div className="w-full border bg-white p-2.5 shadow-md rounded mt-5 ">
+      <div className="pb-3">
+        <span className=" border-textColor text-sm cursor-default">
           All users you can follow{" "}
         </span>
       </div>
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex items-center  gap-3">
         {otherAllUsers?.map((user) => {
           const userIfollor = user.followers.find(
             (f) => f.followersId === localUser._id
           );
-          console.log("ifollow", userIfollor);
           return (
             <div key={user.id} className="flex items-center justify-center ">
               <Link href={`profile/${user.username}`}>

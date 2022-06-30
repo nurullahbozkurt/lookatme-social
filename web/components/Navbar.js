@@ -45,7 +45,7 @@ const Navbar = () => {
               />
               <button
                 type="submit"
-                className="text-white absolute right-0 top-0 bottom-0 bg-primaryBlue hover:bg-primaryBlue/80 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-r-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                className="text-white absolute right-0 top-0 bottom-0 bg-primaryBlue hover:bg-primaryGreen focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-r-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
               >
                 Search
               </button>

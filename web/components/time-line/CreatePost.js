@@ -1,30 +1,32 @@
+import Image from "next/image";
 import { BiSend } from "react-icons/bi";
 import { FiImage } from "react-icons/fi";
+import ReactLoading from "react-loading";
 import { useMutation } from "react-query";
 import { GoLocation } from "react-icons/go";
-import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { RiDeleteBin5Line } from "react-icons/ri";
-import { useTimeline } from "../../states/timeline";
+import { useState, useRef, useEffect } from "react";
 
-import Axios from "../../lib/axios";
-import { useAuth } from "../../states/auth";
-import LocalSelect from "./LocalSelect";
-import useGetTimeline from "../../hooks/api/useGetTimeline";
 import { memo } from "react";
+import Axios from "../../lib/axios";
+import LocalSelect from "./LocalSelect";
+import { useAuth } from "../../states/auth";
+import { useTimeline } from "../../states/timeline";
+import useGetTimeline from "../../hooks/api/useGetTimeline";
 
 const CreatePost = () => {
-  const { localUser } = useAuth();
-  const { location } = useTimeline();
-  const { timeLineRefetch } = useGetTimeline();
   const ref = useRef();
+
+  const { localUser } = useAuth();
   const userId = localUser?._id;
 
-  const [locationSelect, setLocationSelect] = useState(false);
+  const { location } = useTimeline();
 
-  useEffect(() => {
-    setPost({ ...post, country: location.country, city: location.city });
-  }, [location]);
+  const { timeLineRefetch } = useGetTimeline();
+
+  const [locationSelect, setLocationSelect] = useState(false);
+  const [image, setImage] = useState(null);
+  const imgURL = image ? URL.createObjectURL(image) : null;
 
   const [post, setPost] = useState({
     userId: userId,
@@ -33,10 +35,6 @@ const CreatePost = () => {
     country: "",
     city: "",
   });
-
-  const [image, setImage] = useState(null);
-
-  const imgURL = image ? URL.createObjectURL(image) : null;
 
   const handleClick = () => {
     ref.current.click();
@@ -71,6 +69,7 @@ const CreatePost = () => {
     if (image) {
       try {
         await fetchImage.mutateAsync();
+        setImage(null);
       } catch (err) {
         console.log(err);
       }
@@ -91,75 +90,93 @@ const CreatePost = () => {
     }
   };
 
+  //useEffects
+  useEffect(() => {
+    setPost({ ...post, country: location.country, city: location.city });
+  }, [location]);
+
   return (
-    <div className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
-      <div className="flex flex-col gap-2">
-        <div>
-          <textarea
-            onChange={(e) => setPost({ ...post, desc: e.target.value })}
-            value={post.desc}
-            placeholder="Type something .."
-            className="w-full p-3 rounded-md bg-gray-100"
-          />
-        </div>
-        <div className="flex items-center justify-between text-primaryBlue text-[22px]">
-          <div className="flex items-center gap-[14px]">
-            <div className="flex items-center justify-center">
-              <div className="hover:text-primaryGreen flex items-center">
-                {!image && (
-                  <button onClick={handleClick}>
-                    <FiImage />
-                  </button>
-                )}
-
-                {image && (
-                  <>
-                    <div className="relative group">
-                      <div className="relative w-10 h-10 rounded overflow-hidden">
-                        <Image
-                          className="w-full h-full"
-                          alt=""
-                          src={imgURL}
-                          objectFit="cover"
-                          layout="fill"
-                          width={600}
-                          height={350}
-                        />
-                      </div>
-                      <button
-                        onClick={deleteImg}
-                        className="absolute hidden group-hover:block  -top-2 -right-2 rounded-full text-white text-xs p-1 bg-red-800"
-                      >
-                        <RiDeleteBin5Line />
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-              <input
-                onChange={handleSetImage}
-                onClick={handleRefresh}
-                ref={ref}
-                type="file"
-                className="hidden"
-              />
-            </div>
-            <button
-              onClick={() => setLocationSelect(!locationSelect)}
-              className="hover:text-primaryGreen"
-            >
-              <GoLocation />
-            </button>
-            {locationSelect && <LocalSelect />}
+    <div>
+      <div className="w-full border bg-white p-5 flex flex-col gap-5 shadow-md rounded">
+        <div className="flex flex-col gap-2">
+          <div>
+            <textarea
+              onChange={(e) => setPost({ ...post, desc: e.target.value })}
+              value={post.desc}
+              placeholder="Type something .."
+              className="w-full p-3 rounded-md bg-gray-100"
+            />
           </div>
+          <div className="flex items-center justify-between text-primaryBlue text-[22px]">
+            <div className="flex items-center gap-[14px]">
+              <div className="flex items-center justify-center">
+                <div className="hover:text-primaryGreen flex items-center">
+                  {!image && (
+                    <button onClick={handleClick}>
+                      <FiImage />
+                    </button>
+                  )}
 
-          <button
-            onClick={uploadPost}
-            className="flex items-center gap-1 rounded-md text-white bg-primaryBlue text-sm px-3 py-1.5 hover:bg-primaryGreen"
-          >
-            <span>Send</span>
-            <BiSend />
-          </button>
+                  {image && (
+                    <>
+                      <div className="relative group">
+                        <div className="relative w-10 h-10 rounded overflow-hidden">
+                          <Image
+                            className="w-full h-full"
+                            alt=""
+                            src={imgURL}
+                            objectFit="cover"
+                            layout="fill"
+                            width={600}
+                            height={350}
+                          />
+                        </div>
+                        <button
+                          onClick={deleteImg}
+                          className="absolute hidden group-hover:block  -top-2 -right-2 rounded-full text-white text-xs p-1 bg-red-800"
+                        >
+                          <RiDeleteBin5Line />
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+                <input
+                  onChange={handleSetImage}
+                  onClick={handleRefresh}
+                  ref={ref}
+                  type="file"
+                  className="hidden"
+                />
+              </div>
+              <button
+                onClick={() => setLocationSelect(!locationSelect)}
+                className="hover:text-primaryGreen"
+              >
+                <GoLocation />
+              </button>
+              {locationSelect && <LocalSelect />}
+
+              {(fetchImage.isLoading || fetchPost.isLoading) && (
+                <div>
+                  <ReactLoading
+                    type={"spin"}
+                    color={"#0089BA"}
+                    height={20}
+                    width={20}
+                  />
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={uploadPost}
+              className="flex items-center gap-1 rounded-md text-white bg-primaryBlue text-sm px-3 py-1.5 hover:bg-primaryGreen"
+            >
+              <span>Send</span>
+              <BiSend />
+            </button>
+          </div>
         </div>
       </div>
     </div>
