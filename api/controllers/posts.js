@@ -387,9 +387,17 @@ const myTimeline = async (req, res) => {
       })
     );
     if (mePost) {
-      res.status(200).json(mePost.concat(...friendsPosts).reverse());
+      res.status(200).json(
+        mePost.concat(...friendsPosts).sort((a, b) => {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        })
+      );
     }
-    res.status(200).json(friendsPosts);
+    res.status(200).json(
+      friendsPosts.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      })
+    );
   } catch (err) {
     res.status(500).json(err);
   }
@@ -398,11 +406,46 @@ module.exports.myTimeline = myTimeline;
 
 //Get All Posts
 const getAllPosts = async (req, res) => {
-  const postsCount = await Post.find().countDocuments();
+  //const postsCount = await Post.find().countDocuments();
 
   try {
-    const posts = await Post.find();
-    res.status(200).json({ posts, postsCount });
+    const posts = await Post.find()
+
+      .populate({
+        path: "user",
+        select: { isAdmin: 0, createdAt: 0, updatedAt: 0 },
+      })
+      .populate({
+        path: "likes",
+        populate: {
+          path: "likedUser",
+          select: {
+            coverPicture: 0,
+            createdAt: 0,
+            updatedAt: 0,
+            isAdmin: 0,
+          },
+        },
+      })
+      .populate({
+        path: "comments",
+        populate: [
+          {
+            path: "commentLikes",
+            model: "CommentLikes",
+          },
+          {
+            path: "user",
+            model: "User",
+          },
+        ],
+      });
+
+    res.status(200).json(
+      posts.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      })
+    );
   } catch (err) {
     res.status(500).json(err);
   }
