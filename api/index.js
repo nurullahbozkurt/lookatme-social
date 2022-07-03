@@ -35,6 +35,11 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 //app.use("/public", express.static(path.join(__dirname, "/public")));
 
+app.use(express.static(path.join(__dirname, ".web/build")));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, ".web/build/index.html"));
+});
+
 mongoose
   .connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
