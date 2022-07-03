@@ -14,17 +14,16 @@ import useGetUser from "../hooks/api/useGetUser";
 import PictureOfTheCommenter from "./PictureOfTheCommenter";
 import { useMutateCommentLike } from "../hooks/api/mutations/useMutateCommentLike";
 
-const Comment = ({ comments, timeLineRefetch }) => {
+const Comment = ({ post, refetch, mutateKEY }) => {
   const { localUser } = useAuth();
   const { user } = useGetUser();
   const [comment, setComment] = useState({
     postId: null,
     comment: null,
   });
-
   //Mutations
   const { mutateAsync: likeCommentMutate, isLoading: likeCommentIsLoading } =
-    useMutateCommentLike(["timeline"]);
+    useMutateCommentLike(mutateKEY);
 
   // fetch functions
   const fetchCommentDelete = useMutation((id) => {
@@ -37,15 +36,15 @@ const Comment = ({ comments, timeLineRefetch }) => {
     });
   });
 
-  const sendComment = (e) => {
+  const sendComment = async (e) => {
     e.preventDefault();
     try {
-      fetchComment.mutateAsync();
+      await fetchComment.mutateAsync();
       setComment({
         postId: null,
         comment: "",
       });
-      timeLineRefetch();
+      refetch();
     } catch (err) {
       console.log(err);
     }
@@ -56,7 +55,7 @@ const Comment = ({ comments, timeLineRefetch }) => {
       <div className="flex items-center gap-3 text-sm font-semibold">
         <p>
           Comments :
-          <span className="text-textColor/80"> {comments.comments.length}</span>
+          <span className="text-textColor/80"> {post.comments.length}</span>
         </p>
         <div>
           {" "}
@@ -72,9 +71,9 @@ const Comment = ({ comments, timeLineRefetch }) => {
           )}{" "}
         </div>
       </div>
-      {comments.comments.map((comment, index) => {
+      {post.comments.map((comment, index) => {
         const { name, lastname } = userInfo(comment.user[0]);
-        const meComment = comment.userWhoCommentedId === localUser._id;
+        const myComment = comment.userWhoCommentedId === localUser._id;
 
         const iLikeComment = comment?.commentLikes.some((like) => {
           return like?.userId === localUser?._id;
@@ -97,13 +96,13 @@ const Comment = ({ comments, timeLineRefetch }) => {
                         {name} {lastname}
                       </a>
                     </Link>
-                    {meComment && (
+                    {myComment && (
                       <button
                         onClick={async () => {
                           await fetchCommentDelete.mutateAsync({
                             id: comment.id,
                           });
-                          timeLineRefetch();
+                          refetch();
                         }}
                         className="hidden group-hover:block text-red-700 text-lg z-10"
                       >
@@ -120,6 +119,7 @@ const Comment = ({ comments, timeLineRefetch }) => {
                       <button
                         onClick={async () => {
                           await likeCommentMutate(comment.id);
+                          refetch();
                         }}
                         className={`${
                           iLikeComment ? "text-red-700" : ""
@@ -131,13 +131,13 @@ const Comment = ({ comments, timeLineRefetch }) => {
                   </div>
                 </div>
                 <div className="">
-                  {meComment && (
+                  {myComment && (
                     <PictureOfTheCommenter
                       link={comment.user[0].username}
                       profilePic={comment.user[0].profilePicture}
                     />
                   )}
-                  {!meComment && (
+                  {!myComment && (
                     <PictureOfTheCommenter
                       link={comment.user[0].username}
                       profilePic={comment.user[0].profilePicture}
@@ -167,7 +167,7 @@ const Comment = ({ comments, timeLineRefetch }) => {
               setComment({
                 ...comment,
                 comment: e.target.value,
-                postId: comments.id,
+                postId: post.id,
               })
             }
             value={comment?.comment || ""}

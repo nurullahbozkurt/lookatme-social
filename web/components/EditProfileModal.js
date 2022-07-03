@@ -25,7 +25,6 @@ const EditProfileModal = () => {
   const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
 
   const hiddenFileInput = React.useRef();
-  console.log("user", user);
 
   const [form, setForm] = useState({
     username: user?.username,

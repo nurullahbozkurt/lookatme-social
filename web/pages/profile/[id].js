@@ -12,11 +12,12 @@ import { MdOutlineWorkOutline } from "react-icons/md";
 import userInfo from "../../data/userInfo";
 import { useAuth } from "../../states/auth";
 import Layout from "../../components/Layout";
-import MyPosts from "../../components/MyPosts";
+import Posts from "../../components/Posts";
 import Loading from "../../components/Loading";
 import { useAppContext } from "../../states/app";
 import withProtectedRoute from "../withProtectedRoute";
 import useGetAllUser from "../../hooks/api/useGetAllUser";
+import useGetMyAllPosts from "../../hooks/api/useGetMyAllPosts";
 import EditProfileModal from "../../components/EditProfileModal";
 import { useMutateUserFollow } from "../../hooks/api/mutations/useMutateUserFollow";
 import { useMutateUserUnFollow } from "../../hooks/api/mutations/useMutateUserUnFollow";
@@ -26,6 +27,7 @@ const Profile = () => {
   const queryId = router.query.id;
 
   const { localUser } = useAuth();
+
   const { data, isLoading, refetch } = useGetAllUser();
 
   const { setIsOpenEditProfileModal, isOpenEditProfileModal } = useAppContext();
@@ -33,6 +35,14 @@ const Profile = () => {
   const user = useMemo(() => {
     return data?.find((user) => user.username === queryId);
   }, [queryId, data]);
+
+  const mutateKEY = useMemo(() => {
+    return ["getMyAllPosts", user?._id];
+  }, [user]);
+
+  const { myPost, isLoadingMyAllPosts, refetchMyAllPosts } = useGetMyAllPosts(
+    user?._id
+  );
 
   const { name, lastname, job, country, city, desc, picUrl } = userInfo(user);
   const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
@@ -192,9 +202,11 @@ const Profile = () => {
                     </div>
                   )}
                   {(country || city) && (
-                    <h1>
-                      {country}, {city}
-                    </h1>
+                    <button onClick={openModal}>
+                      <h1 className="font-semibold">
+                        {country}, {city}
+                      </h1>
+                    </button>
                   )}
                 </div>
 
@@ -210,10 +222,12 @@ const Profile = () => {
                     </div>
                   )}
                   {job && (
-                    <h1 className="flex items-center gap-1 ">
-                      <MdOutlineWorkOutline />
-                      {job}
-                    </h1>
+                    <button onClick={openModal}>
+                      <h1 className="flex items-center gap-1 ">
+                        <MdOutlineWorkOutline />
+                        {job}
+                      </h1>
+                    </button>
                   )}
                 </div>
 
@@ -230,17 +244,25 @@ const Profile = () => {
                       </div>
                     )}
                     {desc && (
-                      <h1 className="flex items-center gap-1 ">
-                        <BsPencilFill />
-                        {desc}
-                      </h1>
+                      <button onClick={openModal}>
+                        <h1 className="flex items-center gap-1 ">
+                          <BsPencilFill />
+                          {desc}
+                        </h1>
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
             </div>
             <div className="w-full flex flex-col gap-5 px-20 py-10">
-              <MyPosts userId={user?._id} />
+              <Posts
+                userId={user?._id}
+                mutateKEY={mutateKEY}
+                posts={myPost}
+                isLoading={isLoadingMyAllPosts}
+                refetch={refetchMyAllPosts}
+              />
             </div>
           </div>
         </div>

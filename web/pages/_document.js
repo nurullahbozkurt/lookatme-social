@@ -11,7 +11,7 @@ export default function Document() {
           rel="stylesheet"
         />
       </Head>
-      <body className="bg-gray-100 font-nunito">
+      <body className="bg-[#f3f2ef] font-nunito">
         <Main />
         <NextScript />
       </body>

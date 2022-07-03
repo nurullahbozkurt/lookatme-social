@@ -19,7 +19,6 @@ const ProfileCard = () => {
     isLoading
   );
   const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
-  console.log("profilePic", profilePic);
 
   const [avatar, setAvatar] = useState();
   const [file, setFile] = useState();

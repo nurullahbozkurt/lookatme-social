@@ -1,27 +1,16 @@
-import Link from "next/link";
 import { memo } from "react";
-import Image from "next/image";
-import { format } from "date-fns";
-import { AiFillLike } from "react-icons/ai";
-import { GoLocation } from "react-icons/go";
 
+import Posts from "../Posts";
 import Loading from "../Loading";
-import Comment from "../Comment";
-import userInfo from "../../data/userInfo";
-import { useAuth } from "../../states/auth";
 import { useAppContext } from "../../states/app";
-import PictureOfTheLiker from "../PictureOfTheLiker";
 import useGetTimeline from "../../hooks/api/useGetTimeline";
-import { useMutatePostLike } from "../../hooks/api/mutations/useMutatePostLike";
 
 const TimeLinePosts = () => {
-  const { localUser } = useAuth();
   const { usersIFollow } = useAppContext();
+
   const { timeLine, timeLineRefetch, isLoading } = useGetTimeline();
 
-  //Mutations
-  const { mutateAsync: likePostMutate, isLoading: likePostIsLoading } =
-    useMutatePostLike(["timeline"]);
+  const mutateKEY = ["timeline"];
 
   if (isLoading) return <Loading />;
   return (
@@ -31,12 +20,16 @@ const TimeLinePosts = () => {
           You don't follow anyone yet
         </div>
       )}
-      {timeLine?.map((post, index) => {
+      <Posts
+        mutateKEY={mutateKEY}
+        posts={timeLine}
+        isLoading={isLoading}
+        refetch={timeLineRefetch}
+      />
+      {/* {timeLine?.map((post, index) => {
         const { name, lastname, job } = userInfo(post.user);
-        console.log("post", post);
 
         const postImg = post?.img !== process.env.IMAGE_URL;
-        console.log("postImg", postImg);
 
         const dateFormat = new Date(post.createdAt); // dateStr you get from mongodb
         const date = format(dateFormat, "PPpp");
@@ -149,11 +142,15 @@ const TimeLinePosts = () => {
                   )}
                 </div>
               </div>
-              <Comment timeLineRefetch={timeLineRefetch} comments={post} />
+              <Comment
+                timeLineRefetch={timeLineRefetch}
+                comments={post}
+                mutateKEY={mutateKEY}
+              />
             </main>
           </div>
         );
-      })}
+      })} */}
     </>
   );
 };

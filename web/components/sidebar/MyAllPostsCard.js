@@ -28,8 +28,8 @@ const MyAllPostsCard = () => {
         <div className="w-full font-semibold">
           <div className="flex items-center gap-1">
             <h1>My Posts</h1>
-            <div className="rounded-full flex items-center justify-center bg-primaryGreen text-white p-0.5 w-4 h-4">
-              <p className="text-xs"> {myPost.length}</p>
+            <div className="rounded-full flex items-center justify-center bg-primaryGreen text-white p-0.5 w-5 h-5">
+              <p className="text-xs"> {myPost?.length}</p>
             </div>
           </div>
         </div>

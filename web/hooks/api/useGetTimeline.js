@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
 import { useQuery } from "react-query";
 import { useAuth } from "../../states/auth";
 import Axios from "../../lib/axios";
 
 const useGetTimeline = () => {
-  const { localUser, userLoaded } = useAuth();
+  const { localUser } = useAuth();
   const userId = localUser._id;
 
   const {

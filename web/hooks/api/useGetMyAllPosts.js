@@ -13,7 +13,12 @@ const useMyPosts = (userId) => {
     }
   );
 
-  return { myPost: data, isLoading, refetch, isFetching };
+  return {
+    myPost: data,
+    isLoadingMyAllPosts: isLoading,
+    refetchMyAllPosts: refetch,
+    isFetching,
+  };
 };
 
 export default useMyPosts;
