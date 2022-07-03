@@ -3,6 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const multer = require("multer");
+const Users = require("./controllers/users");
 
 // it fixes express's error handler to work with async/await
 // we should remove this package and this line when Express v5 is released.
@@ -80,6 +81,9 @@ app.post("/api/upload", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/posts", postRouter);
+
+//Search User
+app.get("/api/search/:id", Users.searchUser);
 
 // error handler
 app.use(function (err, req, res, next) {

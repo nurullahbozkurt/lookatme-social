@@ -259,3 +259,24 @@ const unfollowUser = async (req, res) => {
   res.status(200).json("User you are not already following !");
 };
 module.exports.unfollowUser = unfollowUser;
+
+// Search User
+const searchUser = async (req, res) => {
+  console.log("req.params.id", req.params.id);
+  if (req.params.id === "") {
+    return res.status(400).json("Please enter a username !");
+  }
+
+  const keys = ["username", "name", "lastName", "email"];
+  const user = await User.find();
+  const search = user.filter((user) => {
+    return keys.some((key) =>
+      user[key].toLowerCase().includes(req.params.id.toLowerCase())
+    );
+  });
+  if (!user) {
+    return res.status(404).json("User not found !");
+  }
+  res.status(200).json(search);
+};
+module.exports.searchUser = searchUser;

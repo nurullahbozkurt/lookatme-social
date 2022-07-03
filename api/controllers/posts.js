@@ -175,7 +175,11 @@ const userAllPosts = async (req, res) => {
     });
 
   try {
-    res.status(200).json(userPosts);
+    res.status(200).json(
+      userPosts.sort((a, b) => {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      })
+    );
   } catch (err) {
     res.status(500).json(err);
   }
