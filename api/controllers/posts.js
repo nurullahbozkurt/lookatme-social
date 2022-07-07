@@ -281,8 +281,6 @@ const likeComment = async (req, res) => {
     userId: req.user._id,
     commentId: req.params.id,
   });
-  console.log("Like", like);
-  console.log("comment", comment);
 
   if (like.length === 0) {
     try {

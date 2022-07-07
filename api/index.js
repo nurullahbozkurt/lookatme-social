@@ -23,6 +23,8 @@ dotenv.config();
 const userRouter = require("./routes/users");
 const authRouter = require("./routes/auth");
 const postRouter = require("./routes/posts");
+const messageRouter = require("./routes/messages");
+const conversationRouter = require("./routes/conversations");
 
 //middleware
 app.use(express.json());
@@ -34,11 +36,6 @@ app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use(express.static(path.join(__dirname, "public")));
 //app.use("/public", express.static(path.join(__dirname, "/public")));
-
-app.use(express.static(path.join(__dirname, ".web/build")));
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, ".web/build/index.html"));
-});
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -86,6 +83,8 @@ app.post("/api/upload", (req, res) => {
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/posts", postRouter);
+app.use("/api/messages", messageRouter);
+app.use("/api/conversations", conversationRouter);
 
 //Search User
 app.get("/api/search/:id", Users.searchUser);

@@ -96,8 +96,6 @@ const postCoverPicture = async (req, res) => {
         });
       }
 
-      console.log(req.user);
-
       await User.updateOne(
         { _id: req.user._id },
         {
@@ -172,8 +170,6 @@ const followUser = async (req, res) => {
     followingId: req.params.id,
     myId: req.user._id,
   });
-  console.log("following", following);
-  console.log("followers", followers);
 
   if (!me || !otherUser) {
     return res.status(404).json("User not found !");
@@ -196,7 +192,6 @@ const followUser = async (req, res) => {
     }
   }
   if (!followers) {
-    console.log("gollowers çalıştı");
     try {
       const newFollowers = new Followers({
         myId: req.params.id,
@@ -262,7 +257,6 @@ module.exports.unfollowUser = unfollowUser;
 
 // Search User
 const searchUser = async (req, res) => {
-  console.log("req.params.id", req.params.id);
   if (req.params.id === "") {
     return res.status(400).json("Please enter a username !");
   }
