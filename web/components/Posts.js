@@ -18,8 +18,6 @@ import { useMutation } from "react-query";
 const Posts = ({ posts, isLoading, mutateKEY, refetch }) => {
   const { localUser } = useAuth();
 
-  console.log("mutateKEY", mutateKEY);
-
   const fetchDeletePost = useMutation((id) => {
     return Axios.delete(`/posts/${id}`);
   });
@@ -53,7 +51,6 @@ const Posts = ({ posts, isLoading, mutateKEY, refetch }) => {
         posts.map((post, index) => {
           const myPost = post.userId === localUser._id;
           const postImg = post?.img !== process.env.IMAGE_URL;
-          console.log("mePost", myPost);
           const dateFormat = new Date(post?.createdAt); // dateStr you get from mongodb
           const date = format(dateFormat, "PPpp");
           const { name, lastname, job } = userInfo(post?.user);

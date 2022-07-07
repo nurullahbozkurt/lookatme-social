@@ -5,10 +5,15 @@ import { FaUserEdit } from "react-icons/fa";
 import { BsPencilFill } from "react-icons/bs";
 import { useMemo, memo, useEffect } from "react";
 import { AiOutlineUserAdd } from "react-icons/ai";
-import { RiUserFollowLine } from "react-icons/ri";
-import { RiUserUnfollowLine } from "react-icons/ri";
 import { MdOutlineWorkOutline } from "react-icons/md";
+import { useMutation } from "react-query";
+import {
+  RiUserFollowLine,
+  RiWechatLine,
+  RiUserUnfollowLine,
+} from "react-icons/ri";
 
+import Axios from "../../lib/axios";
 import userInfo from "../../data/userInfo";
 import { useAuth } from "../../states/auth";
 import Layout from "../../components/Layout";
@@ -25,6 +30,7 @@ import { useMutateUserUnFollow } from "../../hooks/api/mutations/useMutateUserUn
 const Profile = () => {
   const router = useRouter();
   const queryId = router.query.id;
+  console.log("queryId", router);
 
   const { localUser } = useAuth();
 
@@ -64,6 +70,27 @@ const Profile = () => {
     mutateAsync: userUnFollowMutateAsync,
     isLoading: userUnFollowIsLoading,
   } = useMutateUserUnFollow(["getAllUser"]);
+
+  const fetchCreateConversation = useMutation(() => {
+    return Axios.post(
+      "/conversations",
+      {
+        senderId: localUser?._id,
+        receiverId: user?._id,
+      },
+      {}
+    );
+  });
+
+  const createConversation = async () => {
+    try {
+      const res = await fetchCreateConversation.mutateAsync();
+      console.log("res", res);
+      res.data && router.push(`/messages/${res.data._id}`);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const openModal = () => {
     setIsOpenEditProfileModal(true);
@@ -143,7 +170,17 @@ const Profile = () => {
                 </div>
               </div>
               {!me && (
-                <div className="flex items-center">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={createConversation}
+                    className="flex items-center gap-1 px-2 py-1 rounded bg-primaryBlue hover:bg-primaryGreen text-white"
+                  >
+                    <div className="text-2xl ">
+                      <RiWechatLine />
+                    </div>
+                    <p className="text-sm">Send a message</p>
+                  </button>
+
                   {!followControl && (
                     <button
                       onClick={async () => {

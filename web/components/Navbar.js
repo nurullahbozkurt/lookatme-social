@@ -17,8 +17,6 @@ const Navbar = () => {
     fetchData(filter)
   );
 
-  console.log("isLoading", isLoading, data);
-
   return (
     <>
       <div className="w-full flex items-center border-b justify-between h-20 bg-white px-10">

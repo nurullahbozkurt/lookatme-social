@@ -20,7 +20,8 @@
     "react-icons": "^4.3.1",
     "react-loading": "^2.0.3",
     "react-query": "^3.39.1",
-    "react-textarea-counter": "^1.0.0"
+    "react-textarea-counter": "^1.0.0",
+    "timeago.js": "^4.0.2"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.7",

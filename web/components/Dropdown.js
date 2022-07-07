@@ -48,8 +48,23 @@ export default function Dropdown() {
                       active ? "bg-primaryBlue text-white" : "text-gray-900"
                     } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
                   >
-                    <Link href={`/profile/${localUser.username}`}>
+                    <Link href={`/profile/${localUser?.username}`}>
                       <a className="w-full">Profile</a>
+                    </Link>
+                  </div>
+                )}
+              </Menu.Item>
+            </div>
+            <div className="px-1 py-1 ">
+              <Menu.Item>
+                {({ active }) => (
+                  <div
+                    className={`${
+                      active ? "bg-primaryBlue text-white" : "text-gray-900"
+                    } group flex w-full items-center rounded-md px-2 py-2 text-sm`}
+                  >
+                    <Link href={`/messages/`}>
+                      <a className="w-full">Messages</a>
                     </Link>
                   </div>
                 )}
