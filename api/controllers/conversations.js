@@ -27,7 +27,12 @@ const getConversation = async (req, res) => {
   const otherUser = await Conversation.find({
     members: { $in: [req.user._id] },
   });
-  const otherUserId = otherUser[0].members.filter((id) => id !== req.user._id);
+
+  const otherUserId = otherUser.map((user) =>
+    user.members.filter((id) => id !== req.user._id)
+  );
+  console.log("OTHER USER", otherUserId);
+
   try {
     const conversation = await Conversation.find({
       members: { $in: [req.user._id] },
