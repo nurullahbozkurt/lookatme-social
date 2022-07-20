@@ -16,7 +16,9 @@ import { useMutateCommentLike } from "../hooks/api/mutations/useMutateCommentLik
 
 const Comment = ({ post, refetch, mutateKEY }) => {
   const { localUser } = useAuth();
-  const { user } = useGetUser();
+
+  const { user } = useGetUser(localUser?._id);
+
   const [comment, setComment] = useState({
     postId: null,
     comment: null,

@@ -30,7 +30,6 @@ import { useMutateUserUnFollow } from "../../hooks/api/mutations/useMutateUserUn
 const Profile = () => {
   const router = useRouter();
   const queryId = router.query.id;
-  console.log("queryId", router);
 
   const { localUser } = useAuth();
 
@@ -41,6 +40,8 @@ const Profile = () => {
   const user = useMemo(() => {
     return data?.find((user) => user.username === queryId);
   }, [queryId, data]);
+
+  console.log("user", user);
 
   const mutateKEY = useMemo(() => {
     return ["getMyAllPosts", user?._id];
@@ -71,6 +72,7 @@ const Profile = () => {
     isLoading: userUnFollowIsLoading,
   } = useMutateUserUnFollow(["getAllUser"]);
 
+  // Create new chat
   const fetchCreateConversation = useMutation(() => {
     return Axios.post(
       "/conversations",
@@ -86,7 +88,7 @@ const Profile = () => {
     try {
       const res = await fetchCreateConversation.mutateAsync();
       console.log("res", res);
-      res.data && router.push(`/messages/${res.data._id}`);
+      res.data && router.push(`/messages/${queryId}?convId=${res.data._id}`);
     } catch (err) {
       console.log(err);
     }

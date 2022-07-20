@@ -3,11 +3,11 @@ import { useAuth } from "../../states/auth";
 import { useQuery } from "react-query";
 import { useMemo } from "react";
 
-const useGetUser = () => {
-  const { localUser } = useAuth();
+const useGetUser = (user) => {
+  //const { localUser } = useAuth();
   const userId = useMemo(() => {
-    return localUser?._id;
-  }, [localUser]);
+    return user;
+  }, [user]);
 
   const {
     isLoading,

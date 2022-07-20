@@ -1,13 +1,17 @@
-import Image from "next/image";
-import { useState } from "react";
-import useGetUser from "../../hooks/api/useGetUser";
-import Loading from "../Loading";
-import { IoIosArrowForward } from "react-icons/io";
 import Link from "next/link";
-import { memo } from "react";
+import Image from "next/image";
+import { memo, useState } from "react";
+import { IoIosArrowForward } from "react-icons/io";
+
+import Loading from "../Loading";
+import { useAuth } from "../../states/auth";
+import useGetUser from "../../hooks/api/useGetUser";
 
 const FollowingCard = () => {
-  const { user, isLoading } = useGetUser();
+  const { localUser } = useAuth();
+
+  const { user, isLoading } = useGetUser(localUser?._id);
+
   const [changeFollow, setChangeFollow] = useState(false);
 
   const handleChangeFollow = () => {

@@ -4,7 +4,6 @@ import { useQuery } from "react-query";
 const useGetAllUser = () => {
   const { data, isLoading, refetch } = useQuery(
     "getAllUser",
-
     async () => {
       const { data } = await Axios.get("/users/all-users");
       return data;

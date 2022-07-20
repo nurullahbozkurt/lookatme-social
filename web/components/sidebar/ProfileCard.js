@@ -10,18 +10,23 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import Link from "next/link";
 import { memo } from "react";
 import Axios from "../../lib/axios";
+import { useAuth } from "../../states/auth";
 import useGetUser from "../../hooks/api/useGetUser";
 
 const ProfileCard = () => {
-  const { user, isLoading, timeLineRefetch } = useGetUser();
+  const { localUser } = useAuth();
+
+  const { user, isLoading, timeLineRefetch } = useGetUser(localUser?._id);
+
   const { picUrl, name, lastname, job, country, city } = userInfo(
     user,
     isLoading
   );
+
   const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
 
-  const [avatar, setAvatar] = useState();
   const [file, setFile] = useState();
+  const [avatar, setAvatar] = useState();
   const hiddenFileInput = React.useRef();
 
   const handleClick = () => {

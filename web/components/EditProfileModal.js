@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import userInfo from "../data/userInfo";
 import { useMutation } from "react-query";
 import { Fragment, useState } from "react";
@@ -11,15 +10,17 @@ import { Dialog, Transition } from "@headlessui/react";
 
 import Axios from "../lib/axios";
 import CitySelect from "./CitySelect";
+import { useAuth } from "../states/auth";
 import CountrySelect from "./CountrySelect";
 import { useAppContext } from "../states/app";
 import useGetUser from "../hooks/api/useGetUser";
 
 const EditProfileModal = () => {
-  const { isOpenEditProfileModal, setIsOpenEditProfileModal } = useAppContext();
-  const router = useRouter();
+  const { localUser } = useAuth();
 
-  const { user, isLoading, timeLineRefetch } = useGetUser();
+  const { isOpenEditProfileModal, setIsOpenEditProfileModal } = useAppContext();
+
+  const { user, isLoading, timeLineRefetch } = useGetUser(localUser?._id);
 
   const { picUrl } = userInfo(user);
   const profilePic = picUrl !== process.env.NEXT_PUBLIC_API_URL;
