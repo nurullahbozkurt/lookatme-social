@@ -16,6 +16,7 @@ const ConversationSchema = new mongoose.Schema(
     },
   }
 );
+
 ConversationSchema.virtual("user", {
   ref: "User",
   localField: "members",

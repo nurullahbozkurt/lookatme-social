@@ -83,6 +83,7 @@ const updatePost = async (req, res) => {
 
   try {
     await post.updateOne(req.body);
+
     res.status(200).json("Post updated !");
   } catch (err) {
     res.status(500).json(err);
