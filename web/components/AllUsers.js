@@ -66,7 +66,7 @@ const AllUsers = () => {
                   </div>
                   <div className="absolute top-0 right-0.5">
                     {userIfollor && (
-                      <div className="rounded-full text-white bg-primaryGreen">
+                      <div className="rounded-full text-white bg-primaryBlue">
                         <TiTick />
                       </div>
                     )}
