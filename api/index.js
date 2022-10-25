@@ -89,6 +89,12 @@ app.use("/api/conversations", conversationRouter);
 //Search User
 app.get("/api/search/:id", Users.searchUser);
 
+app.use(express.static(path.join(__dirname, "../web/build")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../web/build", "../web/pages/_app.js"));
+});
+
 // error handler
 app.use(function (err, req, res, next) {
   // set locals, only providing error in development
